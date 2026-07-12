@@ -1,7 +1,13 @@
+import { eq } from "drizzle-orm";
+import db from "../db/index.js";
+import { users } from "../db/schemas/user.js";
+import { roles } from "../db/schemas/role.js";
+import { permissions } from "../db/schemas/permission.js";
+
 import ApiError from "../utils/ApiError.js";
 import { verifyAccessToken } from "../utils/tokens.js";
 
-export function getUser(req, res, next) {
+export async function getUser(req, res, next) {
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -13,7 +19,44 @@ export function getUser(req, res, next) {
 
     try {
         const payload = verifyAccessToken(token);
-        req.user = payload;
+
+        // Fetch user, role, and permissions dynamically from DB
+        const [userWithRole] = await db
+            .select({
+                id: users.id,
+                name: users.name,
+                email: users.email,
+                isVerified: users.isVerified,
+                roleId: users.roleId,
+                roleName: roles.name,
+            })
+            .from(users)
+            .leftJoin(roles, eq(users.roleId, roles.id))
+            .where(eq(users.id, payload.id));
+
+        if (userWithRole) {
+            const userPermissions = await db
+                .select()
+                .from(permissions)
+                .where(eq(permissions.roleId, userWithRole.roleId));
+
+            const permissionsMap = {};
+            userPermissions.forEach((p) => {
+                permissionsMap[p.feature] = p.allowed;
+            });
+
+            req.user = {
+                id: userWithRole.id,
+                name: userWithRole.name,
+                email: userWithRole.email,
+                isVerified: userWithRole.isVerified,
+                roleId: userWithRole.roleId,
+                role: userWithRole.roleName || "User",
+                permissions: permissionsMap,
+            };
+        } else {
+            req.user = null;
+        }
     } catch {
         req.user = null;
     }
@@ -53,47 +96,21 @@ export function requireAdmin(req, _res, next) {
     return next();
 }
 
-export function requireFleetManagerOrAdmin(req, _res, next) {
-    const role = req.user?.role;
-    if (role !== "Fleet Manager" && role !== "Admin") {
-        return next(ApiError.forbidden("Access denied: Fleet Manager or Admin role required"));
-    }
+export function requirePermission(feature) {
+    return (req, _res, next) => {
+        if (!req.user) {
+            return next(ApiError.unauthorized("Login required"));
+        }
 
-    return next();
-}
+        // Admin has full access to everything automatically
+        if (req.user.role === "Admin") {
+            return next();
+        }
 
-export function requireSafetyOfficerOrAdmin(req, _res, next) {
-    const role = req.user?.role;
-    if (role !== "Safety Officer" && role !== "Admin") {
-        return next(ApiError.forbidden("Access denied: Safety Officer or Admin role required"));
-    }
+        if (req.user.permissions?.[feature] !== true) {
+            return next(ApiError.forbidden(`Access denied: Permission for '${feature}' required`));
+        }
 
-    return next();
-}
-
-export function requireDispatcherOrAdmin(req, _res, next) {
-    const role = req.user?.role;
-    if (role !== "Dispatcher" && role !== "Admin") {
-        return next(ApiError.forbidden("Access denied: Dispatcher or Admin role required"));
-    }
-
-    return next();
-}
-
-export function requireFinancialAnalystOrAdmin(req, _res, next) {
-    const role = req.user?.role;
-    if (role !== "Financial Analyst" && role !== "Admin") {
-        return next(ApiError.forbidden("Access denied: Financial Analyst or Admin role required"));
-    }
-
-    return next();
-}
-
-export function requireAnalyticsAccess(req, _res, next) {
-    const role = req.user?.role;
-    if (role !== "Fleet Manager" && role !== "Financial Analyst" && role !== "Admin") {
-        return next(ApiError.forbidden("Access denied: Fleet Manager, Financial Analyst, or Admin role required"));
-    }
-
-    return next();
+        return next();
+    };
 }

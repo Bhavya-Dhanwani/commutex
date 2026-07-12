@@ -1,20 +1,12 @@
 import {
     pgTable,
-    pgEnum,
     uuid,
     varchar,
     boolean,
     timestamp,
 } from "drizzle-orm/pg-core";
 
-export const userRole = pgEnum("role", [
-    "Admin",
-    "Fleet Manager",
-    "Dispatcher",
-    "Safety Officer",
-    "Financial Analyst",
-    "User",
-]);
+import { roles } from "./role.js";
 
 export const users = pgTable("users", {
     id: uuid("id").primaryKey().defaultRandom(),
@@ -24,7 +16,7 @@ export const users = pgTable("users", {
     password: varchar("password", { length: 255 }).notNull(),
     isVerified: boolean("is_verified").default(false).notNull(),
 
-    role: userRole("role").default("User").notNull(),
+    roleId: uuid("role_id").references(() => roles.id),
 
     verificationToken: varchar("verification_token", { length: 255 }),
     verificationExpires: timestamp("verification_expires"),

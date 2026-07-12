@@ -18,13 +18,14 @@ import {
 
 import {
     requireAuth,
-    requireDispatcherOrAdmin,
+    requirePermission,
 } from "../../middlewares/auth.js";
 import validate from "../../middlewares/validate.js";
 
 const router = Router();
 
-router.use(requireAuth, requireDispatcherOrAdmin);
+// Protect all routes: check dynamic permissions for Trips management
+router.use(requireAuth, requirePermission("Trips"));
 
 router.get("/", getTrips);
 router.get("/:id", getTripById);

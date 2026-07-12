@@ -9,11 +9,12 @@ import {
     getMaintenanceAnalytics,
 } from "./controller.js";
 
-import { requireAuth, requireAnalyticsAccess } from "../../middlewares/auth.js";
+import { requireAuth, requirePermission } from "../../middlewares/auth.js";
 
 const router = Router();
 
-router.use(requireAuth, requireAnalyticsAccess);
+// Protect all routes: check dynamic permissions for Analytics access
+router.use(requireAuth, requirePermission("Analytics"));
 
 router.get("/fleet-utilization", getFleetUtilization);
 router.get("/fuel-efficiency", getFuelEfficiency);

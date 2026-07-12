@@ -3,6 +3,7 @@ import { eq } from "drizzle-orm";
 
 import db from "../../db/index.js";
 import { users } from "../../db/schemas/user.js";
+import { roles } from "../../db/schemas/role.js";
 
 import ApiError from "../../utils/ApiError.js";
 import ApiResponse from "../../utils/ApiResponse.js";
@@ -39,13 +40,19 @@ export async function register(req, res) {
 
     const verificationExpires = new Date(Date.now() + 15 * 60 * 1000); // 15 mins
 
+    // Fetch default User role
+    const [userRoleRecord] = await db
+        .select()
+        .from(roles)
+        .where(eq(roles.name, "User"));
+
     const [user] = await db
         .insert(users)
         .values({
             name,
             email,
             password: hashedPassword,
-            role: "User",
+            roleId: userRoleRecord?.id,
             isVerified: false,
             verificationToken: hashedVerificationToken,
             verificationExpires,
@@ -62,7 +69,7 @@ export async function register(req, res) {
         id: user.id,
         name: user.name,
         email: user.email,
-        role: user.role,
+        role: "User",
         isVerified: user.isVerified,
     };
 
@@ -81,7 +88,7 @@ export async function register(req, res) {
             id: user.id,
             name: user.name,
             email: user.email,
-            role: user.role,
+            role: "User",
             isVerified: user.isVerified,
         },
         accessToken,
@@ -91,7 +98,18 @@ export async function register(req, res) {
 export async function login(req, res) {
     const { email, password } = req.validatedData;
 
-    const [user] = await db.select().from(users).where(eq(users.email, email));
+    const [user] = await db
+        .select({
+            id: users.id,
+            name: users.name,
+            email: users.email,
+            password: users.password,
+            isVerified: users.isVerified,
+            roleName: roles.name,
+        })
+        .from(users)
+        .leftJoin(roles, eq(users.roleId, roles.id))
+        .where(eq(users.email, email));
 
     if (!user) {
         throw ApiError.unauthorized("Invalid email or password");
@@ -107,7 +125,7 @@ export async function login(req, res) {
         id: user.id,
         name: user.name,
         email: user.email,
-        role: user.role,
+        role: user.roleName || "User",
         isVerified: user.isVerified,
     };
 
@@ -126,7 +144,7 @@ export async function login(req, res) {
             id: user.id,
             name: user.name,
             email: user.email,
-            role: user.role,
+            role: user.roleName || "User",
             isVerified: user.isVerified,
         },
         accessToken,
@@ -232,8 +250,15 @@ export async function refresh(req, res) {
     }
 
     const [user] = await db
-        .select()
+        .select({
+            id: users.id,
+            name: users.name,
+            email: users.email,
+            isVerified: users.isVerified,
+            roleName: roles.name,
+        })
         .from(users)
+        .leftJoin(roles, eq(users.roleId, roles.id))
         .where(eq(users.id, payload.id));
 
     if (!user) {
@@ -244,7 +269,7 @@ export async function refresh(req, res) {
         id: user.id,
         name: user.name,
         email: user.email,
-        role: user.role,
+        role: user.roleName || "User",
         isVerified: user.isVerified,
     });
 

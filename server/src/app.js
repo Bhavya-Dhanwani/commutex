@@ -49,6 +49,9 @@ app.use("/api/expenses", expenseRoutes);
 import analyticsRoutes from "./modules/analytics/routes.js";
 app.use("/api/analytics", analyticsRoutes);
 
+import roleRoutes from "./modules/role/routes.js";
+app.use("/api/roles", roleRoutes);
+
 // catch-all route
 import ApiError from "./utils/ApiError.js";
 app.all("{*path}", (req, res) => {

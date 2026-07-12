@@ -10,13 +10,14 @@ import {
 import { createVehicleSchema, updateVehicleSchema } from "./schema.js";
 import {
     requireAuth,
-    requireFleetManagerOrAdmin,
+    requirePermission,
 } from "../../middlewares/auth.js";
 import validate from "../../middlewares/validate.js";
 
 const router = Router();
 
-router.use(requireAuth, requireFleetManagerOrAdmin);
+// Protect all routes: check dynamic permissions for Vehicles management
+router.use(requireAuth, requirePermission("Vehicles"));
 
 router.get("/", getVehicles);
 router.get("/:id", getVehicleById);

@@ -17,13 +17,14 @@ import {
 
 import {
     requireAuth,
-    requireFleetManagerOrAdmin,
+    requirePermission,
 } from "../../middlewares/auth.js";
 import validate from "../../middlewares/validate.js";
 
 const router = Router();
 
-router.use(requireAuth, requireFleetManagerOrAdmin);
+// Protect all routes: check dynamic permissions for Maintenance management
+router.use(requireAuth, requirePermission("Maintenance"));
 
 router.get("/", getMaintenanceLogs);
 router.get("/:id", getMaintenanceLogById);

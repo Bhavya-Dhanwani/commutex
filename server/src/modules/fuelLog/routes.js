@@ -10,13 +10,14 @@ import {
 import { createFuelLogSchema, updateFuelLogSchema } from "./schema.js";
 import {
     requireAuth,
-    requireFinancialAnalystOrAdmin,
+    requirePermission,
 } from "../../middlewares/auth.js";
 import validate from "../../middlewares/validate.js";
 
 const router = Router();
 
-router.use(requireAuth, requireFinancialAnalystOrAdmin);
+// Protect all routes: check dynamic permissions for Fuel logs management
+router.use(requireAuth, requirePermission("Fuel"));
 
 router.get("/", getFuelLogs);
 router.get("/:id", getFuelLogById);

@@ -10,13 +10,14 @@ import {
 import { createExpenseSchema, updateExpenseSchema } from "./schema.js";
 import {
     requireAuth,
-    requireFinancialAnalystOrAdmin,
+    requirePermission,
 } from "../../middlewares/auth.js";
 import validate from "../../middlewares/validate.js";
 
 const router = Router();
 
-router.use(requireAuth, requireFinancialAnalystOrAdmin);
+// Protect all routes: check dynamic permissions for Expenses management
+router.use(requireAuth, requirePermission("Expenses"));
 
 router.get("/", getExpenses);
 router.get("/:id", getExpenseById);

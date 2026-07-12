@@ -10,13 +10,14 @@ import {
 import { createDriverSchema, updateDriverSchema } from "./schema.js";
 import {
     requireAuth,
-    requireSafetyOfficerOrAdmin,
+    requirePermission,
 } from "../../middlewares/auth.js";
 import validate from "../../middlewares/validate.js";
 
 const router = Router();
 
-router.use(requireAuth, requireSafetyOfficerOrAdmin);
+// Protect all routes: check dynamic permissions for Drivers management
+router.use(requireAuth, requirePermission("Drivers"));
 
 router.get("/", getDrivers);
 router.get("/:id", getDriverById);
