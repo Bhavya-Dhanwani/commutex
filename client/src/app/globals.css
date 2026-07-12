@@ -9,27 +9,3 @@ body {
   background-color: #FAFAFA;
   color: #111111;
 }
-
-/* Premium Dark Mode Filter */
-html[data-theme='dark'] {
-  filter: invert(1) hue-rotate(180deg);
-}
-
-/* Keep images, charts, maps, badges, and icons displaying in their natural color */
-html[data-theme='dark'] img,
-html[data-theme='dark'] svg,
-html[data-theme='dark'] canvas,
-html[data-theme='dark'] iframe,
-html[data-theme='dark'] video,
-html[data-theme='dark'] .statusBadge,
-html[data-theme='dark'] [class*="statusBadge"],
-html[data-theme='dark'] [class*="StatusBadge"],
-html[data-theme='dark'] [class*="Badge"],
-html[data-theme='dark'] [class*="badge"] {
-  filter: invert(1) hue-rotate(180deg);
-}
-
-/* Transition for theme switching */
-html {
-  transition: filter 0.3s ease;
-}

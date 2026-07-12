@@ -297,6 +297,12 @@ export default function Dashboard() {
   }, [currentTab]);
 
   useEffect(() => {
+    if (currentTab === "dashboard") {
+      setMetrics(null);
+    }
+  }, [currentTab]);
+
+  useEffect(() => {
     const checkUserSession = async () => {
       try {
         const response = await meApi();
