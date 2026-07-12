@@ -1326,18 +1326,8 @@ export default function Dashboard() {
         );
       case "Dispatcher":
         return (
-          <div className={styles.dashboardGrid}>
-            <RecentTrips
-              isEmpty={tripsEmpty}
-              onCreateTrip={() => {
-                setTripsEmpty(false);
-                toast.success("Mock dispatch trip created!");
-              }}
-            />
-            <ActivityFeed activities={[
-              { time: "10:12 AM", text: "Trip TX-9040 marked as Completed" },
-              { time: "10:55 AM", text: "Driver Vikram R. assigned to Trip TX-9038" },
-            ]} />
+          <div style={{ display: "block", width: "100%", marginBottom: "32px" }}>
+            <ActivityFeed activities={activities} />
           </div>
         );
       case "Safety Officer":
@@ -1396,14 +1386,7 @@ export default function Dashboard() {
 
       default:
         return (
-          <div className={styles.dashboardGrid}>
-            <RecentTrips
-              isEmpty={tripsEmpty}
-              onCreateTrip={() => {
-                setTripsEmpty(false);
-                toast.success("Mock dispatch trip created!");
-              }}
-            />
+          <div style={{ display: "block", width: "100%", marginBottom: "32px" }}>
             <ActivityFeed activities={activities} />
           </div>
         );

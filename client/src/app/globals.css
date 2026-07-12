@@ -1,4 +1,8 @@
 /* commuteX global styles */
+html {
+  scroll-behavior: smooth;
+}
+
 :root {
   --font-poppins: 'Poppins', sans-serif;
 }
@@ -8,4 +12,63 @@ body {
   padding: 0;
   background-color: #FAFAFA;
   color: #111111;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+/* Premium Crash-Free Dark Mode Styles */
+html[data-theme='dark'] body {
+  background-color: #0F0F11 !important;
+  color: #FAFAFA !important;
+}
+
+html[data-theme='dark'] header,
+html[data-theme='dark'] aside,
+html[data-theme='dark'] main,
+html[data-theme='dark'] [class*="Card"],
+html[data-theme='dark'] [class*="card"],
+html[data-theme='dark'] [class*="Feed"],
+html[data-theme='dark'] [class*="feed"],
+html[data-theme='dark'] [class*="modal"] {
+  background-color: #151518 !important;
+  border-color: #242428 !important;
+  color: #FAFAFA !important;
+}
+
+html[data-theme='dark'] input,
+html[data-theme='dark'] select,
+html[data-theme='dark'] textarea {
+  background-color: #1D1D22 !important;
+  border-color: #2D2D35 !important;
+  color: #FAFAFA !important;
+}
+
+html[data-theme='dark'] span,
+html[data-theme='dark'] p,
+html[data-theme='dark'] label,
+html[data-theme='dark'] h1,
+html[data-theme='dark'] h2,
+html[data-theme='dark'] h3,
+html[data-theme='dark'] h4,
+html[data-theme='dark'] td,
+html[data-theme='dark'] th,
+html[data-theme='dark'] a,
+html[data-theme='dark'] [class*="logo"],
+html[data-theme='dark'] [class*="logoText"] {
+  color: #FAFAFA !important;
+}
+
+/* Make general divs white in dark mode, excluding buttons, badges, and statuses */
+html[data-theme='dark'] div:not([class*="Badge"]):not([class*="badge"]):not([class*="status"]):not(button) {
+  color: #FAFAFA !important;
+}
+
+/* Fix SVG chart axis labels and text in dark mode */
+html[data-theme='dark'] svg text {
+  fill: #FAFAFA !important;
+}
+
+html[data-theme='dark'] [class*="emptyState"],
+html[data-theme='dark'] [class*="activityItem"] {
+  background-color: transparent !important;
+  color: #FAFAFA !important;
 }
