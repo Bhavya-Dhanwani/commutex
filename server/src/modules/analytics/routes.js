@@ -7,6 +7,7 @@ import {
     getExpensesAnalytics,
     getRevenueAnalytics,
     getMaintenanceAnalytics,
+    getRecentActivity,
 } from "./controller.js";
 
 import { requireAuth, requirePermission } from "../../middlewares/auth.js";
@@ -22,5 +23,6 @@ router.get("/vehicle-roi", getVehicleRoi);
 router.get("/expenses", getExpensesAnalytics);
 router.get("/revenue", getRevenueAnalytics);
 router.get("/maintenance", getMaintenanceAnalytics);
+router.get("/recent", getRecentActivity);
 
 export default router;

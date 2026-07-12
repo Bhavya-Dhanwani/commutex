@@ -1,10 +1,11 @@
-import { eq } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 
 import db from "../../db/index.js";
 import { vehicles } from "../../db/schemas/vehicle.js";
 import { trips } from "../../db/schemas/trip.js";
 import { expenses } from "../../db/schemas/expense.js";
 import { maintenanceLogs } from "../../db/schemas/maintenance.js";
+import { fuelLogs } from "../../db/schemas/fuelLog.js";
 import ApiResponse from "../../utils/ApiResponse.js";
 
 export async function getFleetUtilization(req, res) {
@@ -315,5 +316,42 @@ export async function getMaintenanceAnalytics(req, res) {
         byStatus,
         byType: typeBreakdown,
         byVehicle: vehicleBreakdown,
+    });
+}
+
+export async function getRecentActivity(req, res) {
+    // 1. Fetch 5 most recent trips
+    const recentTrips = await db
+        .select()
+        .from(trips)
+        .orderBy(desc(trips.createdAt))
+        .limit(5);
+
+    // 2. Fetch 5 most recent maintenance logs
+    const recentMaintenance = await db
+        .select()
+        .from(maintenanceLogs)
+        .orderBy(desc(maintenanceLogs.createdAt))
+        .limit(5);
+
+    // 3. Fetch 5 most recent expenses
+    const recentExpenses = await db
+        .select()
+        .from(expenses)
+        .orderBy(desc(expenses.createdAt))
+        .limit(5);
+
+    // 4. Fetch 5 most recent fuel logs
+    const recentFuel = await db
+        .select()
+        .from(fuelLogs)
+        .orderBy(desc(fuelLogs.createdAt))
+        .limit(5);
+
+    return ApiResponse.ok(res, "Recent activities fetched successfully", {
+        trips: recentTrips,
+        maintenance: recentMaintenance,
+        expenses: recentExpenses,
+        fuelLogs: recentFuel,
     });
 }
