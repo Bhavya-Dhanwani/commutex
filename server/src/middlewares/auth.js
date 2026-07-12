@@ -70,3 +70,12 @@ export function requireSafetyOfficerOrAdmin(req, _res, next) {
 
     return next();
 }
+
+export function requireDispatcherOrAdmin(req, _res, next) {
+    const role = req.user?.role;
+    if (role !== "Dispatcher" && role !== "Admin") {
+        return next(ApiError.forbidden("Access denied: Dispatcher or Admin role required"));
+    }
+
+    return next();
+}
