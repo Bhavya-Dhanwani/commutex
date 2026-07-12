@@ -52,3 +52,12 @@ export function requireAdmin(req, _res, next) {
 
     return next();
 }
+
+export function requireFleetManagerOrAdmin(req, _res, next) {
+    const role = req.user?.role;
+    if (role !== "Fleet Manager" && role !== "Admin") {
+        return next(ApiError.forbidden("Access denied: Fleet Manager or Admin role required"));
+    }
+
+    return next();
+}

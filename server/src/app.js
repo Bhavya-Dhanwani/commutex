@@ -28,6 +28,9 @@ app.use("/api/auth", authRoutes);
 import userRoutes from "./modules/user/routes.js";
 app.use("/api/users", userRoutes);
 
+import vehicleRoutes from "./modules/vehicle/routes.js";
+app.use("/api/vehicles", vehicleRoutes);
+
 // catch-all route
 import ApiError from "./utils/ApiError.js";
 app.all("{*path}", (req, res) => {
