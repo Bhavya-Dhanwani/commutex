@@ -2,10 +2,10 @@
     "name": "server",
     "version": "1.0.0",
     "description": "",
-    "main": "index.js",
+    "main": "src/server.js",
     "scripts": {
-        "dev": "node --watch src/index.js",
-        "start": "node src/index.js",
+        "dev": "node --watch src/server.js",
+        "start": "node src/server.js",
         "db:up": "docker compose up -d",
         "db:down": "docker compose down",
         "db:reset": "docker compose down -v && docker compose up -d",
@@ -19,10 +19,16 @@
     "license": "ISC",
     "type": "module",
     "dependencies": {
+        "axios": "^1.18.1",
+        "bcrypt": "^6.0.0",
+        "cookie-parser": "^1.4.7",
+        "cors": "^2.8.6",
         "dotenv": "^17.4.2",
         "drizzle-orm": "^1.0.0-rc.4",
         "express": "^5.2.1",
-        "pg": "^8.22.0"
+        "jsonwebtoken": "^9.0.3",
+        "pg": "^8.22.0",
+        "zod": "^4.4.3"
     },
     "devDependencies": {
         "@types/pg": "^8.20.0",

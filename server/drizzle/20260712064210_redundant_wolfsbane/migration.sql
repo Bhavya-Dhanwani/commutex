@@ -2,6 +2,7 @@ CREATE TYPE "driver_status" AS ENUM('Available', 'On Trip', 'Off Duty', 'Suspend
 CREATE TYPE "expense_category" AS ENUM('Fuel', 'Maintenance', 'Toll', 'Parking', 'Insurance', 'Fine', 'Other');--> statement-breakpoint
 CREATE TYPE "maintenance_status" AS ENUM('Active', 'Completed');--> statement-breakpoint
 CREATE TYPE "trip_status" AS ENUM('Draft', 'Dispatched', 'Completed', 'Cancelled');--> statement-breakpoint
+CREATE TYPE "role" AS ENUM('Admin', 'Fleet Manager', 'Dispatcher', 'Safety Officer', 'Financial Analyst', 'User');--> statement-breakpoint
 CREATE TYPE "vehicle_status" AS ENUM('Available', 'On Trip', 'In Shop', 'Retired');--> statement-breakpoint
 CREATE TYPE "vehicle_type" AS ENUM('Truck', 'Van', 'Mini Truck', 'Trailer', 'Container');--> statement-breakpoint
 CREATE TABLE "drivers" (
@@ -91,7 +92,12 @@ CREATE TABLE "users" (
 	"name" varchar(100) NOT NULL,
 	"email" varchar(255) NOT NULL UNIQUE,
 	"password" varchar(255) NOT NULL,
-	"role_id" uuid NOT NULL,
+	"is_verified" boolean DEFAULT false NOT NULL,
+	"role" "role" DEFAULT 'User'::"role" NOT NULL,
+	"verification_token" varchar(255),
+	"verification_expires" timestamp,
+	"reset_password_token" varchar(255),
+	"reset_password_expires" timestamp,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
@@ -124,5 +130,4 @@ ALTER TABLE "maintenance_logs" ADD CONSTRAINT "maintenance_logs_created_by_users
 ALTER TABLE "trips" ADD CONSTRAINT "trips_vehicle_id_vehicles_id_fkey" FOREIGN KEY ("vehicle_id") REFERENCES "vehicles"("id");--> statement-breakpoint
 ALTER TABLE "trips" ADD CONSTRAINT "trips_driver_id_drivers_id_fkey" FOREIGN KEY ("driver_id") REFERENCES "drivers"("id");--> statement-breakpoint
 ALTER TABLE "trips" ADD CONSTRAINT "trips_created_by_users_id_fkey" FOREIGN KEY ("created_by") REFERENCES "users"("id");--> statement-breakpoint
-ALTER TABLE "users" ADD CONSTRAINT "users_role_id_roles_id_fkey" FOREIGN KEY ("role_id") REFERENCES "roles"("id");--> statement-breakpoint
 ALTER TABLE "vehicles" ADD CONSTRAINT "vehicles_created_by_users_id_fkey" FOREIGN KEY ("created_by") REFERENCES "users"("id");

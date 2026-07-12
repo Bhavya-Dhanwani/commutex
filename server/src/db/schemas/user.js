@@ -1,12 +1,20 @@
 import {
     pgTable,
+    pgEnum,
     uuid,
     varchar,
     boolean,
     timestamp,
 } from "drizzle-orm/pg-core";
 
-import { roles } from "./role.js";
+export const userRole = pgEnum("role", [
+    "Admin",
+    "Fleet Manager",
+    "Dispatcher",
+    "Safety Officer",
+    "Financial Analyst",
+    "User",
+]);
 
 export const users = pgTable("users", {
     id: uuid("id").primaryKey().defaultRandom(),
@@ -14,10 +22,14 @@ export const users = pgTable("users", {
     name: varchar("name", { length: 100 }).notNull(),
     email: varchar("email", { length: 255 }).notNull().unique(),
     password: varchar("password", { length: 255 }).notNull(),
+    isVerified: boolean("is_verified").default(false).notNull(),
 
-    roleId: uuid("role_id")
-        .references(() => roles.id)
-        .notNull(),
+    role: userRole("role").default("User").notNull(),
+
+    verificationToken: varchar("verification_token", { length: 255 }),
+    verificationExpires: timestamp("verification_expires"),
+    resetPasswordToken: varchar("reset_password_token", { length: 255 }),
+    resetPasswordExpires: timestamp("reset_password_expires"),
 
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
