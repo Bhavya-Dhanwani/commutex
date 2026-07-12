@@ -1,0 +1,20 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.error {
+  font-size: 13px;
+  color: #dc2626;
+  margin: 0;
+  padding: 10px 14px;
+  background: #fef2f2;
+  border-radius: 8px;
+  border: 1px solid #fecaca;
+}
+
+.demoSection {
+  margin-top: 20px;
+  margin-bottom: 24px;
+}

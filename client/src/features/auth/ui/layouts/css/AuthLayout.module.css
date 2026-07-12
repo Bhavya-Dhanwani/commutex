@@ -1,0 +1,12 @@
+.layout {
+  display: grid;
+  grid-template-columns: 4fr 6fr;
+  min-height: 100vh;
+  background: #fff;
+}
+
+@media (max-width: 1024px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}

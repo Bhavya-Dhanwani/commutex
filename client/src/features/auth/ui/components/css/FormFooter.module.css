@@ -1,0 +1,17 @@
+.footer {
+  text-align: center;
+  font-size: 14px;
+  color: #666;
+}
+
+.link {
+  color: #111;
+  font-weight: 600;
+  text-decoration: none;
+  margin-left: 4px;
+  transition: opacity 0.2s;
+}
+
+.link:hover {
+  opacity: 0.7;
+}

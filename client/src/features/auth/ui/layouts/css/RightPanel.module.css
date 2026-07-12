@@ -1,0 +1,24 @@
+.panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  min-height: 100vh;
+  background: #fff;
+}
+
+.content {
+  width: 100%;
+  max-width: 440px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+@media (max-width: 1024px) {
+  .panel {
+    padding: 24px;
+    min-height: auto;
+    min-height: 100dvh;
+  }
+}
