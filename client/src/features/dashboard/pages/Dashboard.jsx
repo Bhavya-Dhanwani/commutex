@@ -457,7 +457,7 @@ export default function Dashboard() {
     // Check if the current tab is an integrated data tab
     const isDataTab = ["vehicles", "drivers", "users", "trips", "maintenance", "fuel", "expenses"].includes(currentTab);
 
-    // Apply local query/filter constraints as fallback (shadowing outer tabData)
+    // Apply local query/filter constraints as fallback
     let filteredList = tabData || [];
     if (filterStatus) {
       if (currentTab === "expenses") {
@@ -468,7 +468,7 @@ export default function Dashboard() {
         filteredList = filteredList.filter((item) => item.status === filterStatus);
       }
     }
-    const tabData = filteredList;
+    const filteredTabData = filteredList;
 
     if (!isDataTab) {
       if (currentTab === "settings") {
@@ -557,7 +557,7 @@ export default function Dashboard() {
             <div>
               <h2 className={styles.cardTitle}>{currentTab.charAt(0).toUpperCase() + currentTab.slice(1)} Hub</h2>
               <span style={{ fontSize: "12px", color: "#666666", fontWeight: 500 }}>
-                {tabData.length} records found
+                {filteredTabData.length} records found
               </span>
             </div>
             
@@ -715,7 +715,7 @@ export default function Dashboard() {
           )}
         </div>
 
-        {tabData.length === 0 ? (
+        {filteredTabData.length === 0 ? (
           <EmptyState
             title={`No ${currentTab} registered`}
             description={`Your system does not have any active ${currentTab} registered on the database.`}
@@ -754,7 +754,7 @@ export default function Dashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {tabData.map((item) => (
+                    {filteredTabData.map((item) => (
                       <tr key={item.id} style={{ cursor: "pointer" }}>
                         <td onClick={() => { setDetailModal("vehicle"); setDetailData(item); }} style={{ fontWeight: 600 }}>{item.model}</td>
                         <td onClick={() => { setDetailModal("vehicle"); setDetailData(item); }}>{item.registrationNumber}</td>
@@ -808,7 +808,7 @@ export default function Dashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {tabData.map((item) => (
+                    {filteredTabData.map((item) => (
                       <tr key={item.id} style={{ cursor: "pointer" }}>
                         <td onClick={() => { setDetailModal("driver"); setDetailData(item); }} style={{ fontWeight: 600 }}>{item.name}</td>
                         <td onClick={() => { setDetailModal("driver"); setDetailData(item); }}>{item.licenseNumber} ({item.licenseCategory})</td>
@@ -861,7 +861,7 @@ export default function Dashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {tabData.map((item) => (
+                    {filteredTabData.map((item) => (
                       <tr key={item.id}>
                         <td style={{ fontWeight: 600 }}>{item.tripNumber}</td>
                         <td>{item.source || "N/A"} &rarr; {item.destination || "N/A"}</td>
@@ -999,7 +999,7 @@ export default function Dashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {tabData.map((item) => (
+                    {filteredTabData.map((item) => (
                       <tr key={item.id}>
                         <td style={{ fontWeight: 600 }}>{item.vehicleId?.slice(0, 8) || ""}...</td>
                         <td>{item.maintenanceType || "Routine"}</td>
@@ -1103,7 +1103,7 @@ export default function Dashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {tabData.map((item) => (
+                    {filteredTabData.map((item) => (
                       <tr key={item.id}>
                         <td style={{ fontWeight: 600 }}>{item.vehicleId?.slice(0, 8) || ""}...</td>
                         <td>{item.liters ? `${item.liters} L` : "N/A"}</td>
@@ -1151,7 +1151,7 @@ export default function Dashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {tabData.map((item) => (
+                    {filteredTabData.map((item) => (
                       <tr key={item.id}>
                         <td style={{ fontWeight: 600 }}>{item.vehicleId?.slice(0, 8) || ""}...</td>
                         <td>
