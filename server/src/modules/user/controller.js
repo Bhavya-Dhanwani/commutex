@@ -51,6 +51,10 @@ export async function updateUserRole(req, res) {
     const { id } = req.params;
     const { role } = req.validatedData;
 
+    if (id === req.user.id) {
+        throw ApiError.badRequest("You cannot modify your own role");
+    }
+
     const [user] = await db.select().from(users).where(eq(users.id, id));
 
     if (!user) {
