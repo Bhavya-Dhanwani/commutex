@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { LuUserPlus, LuUser, LuMail } from "react-icons/lu";
 
 import AuthLayout from "../layouts/jsx/AuthLayout";
@@ -15,49 +14,12 @@ import ActionButton from "../components/jsx/ActionButton";
 import Divider from "../components/jsx/Divider";
 import FormFooter from "../components/jsx/FormFooter";
 
+import useSignup from "../../hooks/useSignup";
 import styles from "../css/Signup.module.css";
 
 export default function Signup() {
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-  });
-  const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState({});
-
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-    setErrors({ ...errors, [e.target.name]: "" });
-  };
-
-  const validate = () => {
-    const newErrors = {};
-
-    if (!form.name.trim()) newErrors.name = "Name is required";
-    if (!form.email.trim()) newErrors.email = "Email is required";
-    if (!form.password) newErrors.password = "Password is required";
-    if (form.password.length < 6) newErrors.password = "Password must be at least 6 characters";
-    if (form.password !== form.confirmPassword) newErrors.confirmPassword = "Passwords do not match";
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validate()) return;
-
-    setLoading(true);
-    try {
-      console.log("Signup:", form);
-    } catch (err) {
-      console.error("Signup error:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { form, onSubmit, serverError, isSubmitting } = useSignup();
+  const { register, formState: { errors } } = form;
 
   return (
     <AuthLayout>
@@ -70,15 +32,14 @@ export default function Signup() {
             subtitle="Fill in the details to get started"
           />
 
-          <form onSubmit={handleSubmit} className={styles.form}>
+          <form onSubmit={onSubmit} className={styles.form}>
             <InputField
               label="Full Name"
               name="name"
               placeholder="Enter your full name"
               icon={LuUser}
-              value={form.name}
-              onChange={handleChange}
-              error={errors.name}
+              error={errors.name?.message}
+              {...register("name")}
               required
             />
 
@@ -88,9 +49,8 @@ export default function Signup() {
               name="email"
               placeholder="Enter your email"
               icon={LuMail}
-              value={form.email}
-              onChange={handleChange}
-              error={errors.email}
+              error={errors.email?.message}
+              {...register("email")}
               required
             />
 
@@ -98,9 +58,8 @@ export default function Signup() {
               label="Password"
               name="password"
               placeholder="Enter your password"
-              value={form.password}
-              onChange={handleChange}
-              error={errors.password}
+              error={errors.password?.message}
+              {...register("password")}
               required
             />
 
@@ -108,13 +67,14 @@ export default function Signup() {
               label="Confirm Password"
               name="confirmPassword"
               placeholder="Confirm your password"
-              value={form.confirmPassword}
-              onChange={handleChange}
-              error={errors.confirmPassword}
+              error={errors.confirmPassword?.message}
+              {...register("confirmPassword")}
               required
             />
 
-            <ActionButton type="submit" loading={loading}>
+            {serverError && <p className={styles.error}>{serverError}</p>}
+
+            <ActionButton type="submit" loading={isSubmitting}>
               Sign Up
             </ActionButton>
           </form>

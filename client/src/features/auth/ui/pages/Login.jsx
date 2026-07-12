@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { LuUser } from "react-icons/lu";
 import { FcGoogle } from "react-icons/fc";
 
@@ -19,35 +18,16 @@ import FormFooter from "../components/jsx/FormFooter";
 import ForgotPasswordLink from "../components/jsx/ForgotPasswordLink";
 import DemoAccounts from "../components/jsx/DemoAccounts";
 
+import useLogin from "../../hooks/useLogin";
 import styles from "../css/Login.module.css";
 
 export default function Login() {
-  const [form, setForm] = useState({ email: "", password: "" });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-    setError("");
-  };
+  const { form, onSubmit, serverError, isSubmitting } = useLogin();
+  const { register, setValue, formState: { errors } } = form;
 
   const handleDemoSelect = ({ email, password }) => {
-    setForm({ email, password });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
-
-    try {
-      // API call will be handled by parent/container component
-      console.log("Login:", form);
-    } catch (err) {
-      setError("Invalid email or password");
-    } finally {
-      setLoading(false);
-    }
+    setValue("email", email, { shouldValidate: true });
+    setValue("password", password, { shouldValidate: true });
   };
 
   return (
@@ -61,14 +41,14 @@ export default function Login() {
             subtitle="Login to your account to continue."
           />
 
-          <form onSubmit={handleSubmit} className={styles.form}>
+          <form onSubmit={onSubmit} className={styles.form}>
             <InputField
               label="Email Address"
               type="email"
               name="email"
               placeholder="Enter your email"
-              value={form.email}
-              onChange={handleChange}
+              error={errors.email?.message}
+              {...register("email")}
               required
             />
 
@@ -76,16 +56,16 @@ export default function Login() {
               label="Password"
               name="password"
               placeholder="Enter your password"
-              value={form.password}
-              onChange={handleChange}
+              error={errors.password?.message}
+              {...register("password")}
               required
             />
 
             <ForgotPasswordLink />
 
-            {error && <p className={styles.error}>{error}</p>}
+            {serverError && <p className={styles.error}>{serverError}</p>}
 
-            <ActionButton type="submit" loading={loading}>
+            <ActionButton type="submit" loading={isSubmitting}>
               Login
             </ActionButton>
           </form>

@@ -1,0 +1,14 @@
+.layout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: #fafafa;
+  padding: 24px;
+}
+
+@media (max-width: 480px) {
+  .layout {
+    padding: 16px;
+  }
+}

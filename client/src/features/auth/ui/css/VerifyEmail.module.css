@@ -1,0 +1,69 @@
+.card {
+  max-width: 480px;
+  width: 100%;
+  padding: 48px;
+  text-align: center;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #111;
+  margin: 0;
+}
+
+.description {
+  font-size: 15px;
+  color: #666;
+  margin: 0;
+  line-height: 1.6;
+}
+
+.errorTitle {
+  font-size: 22px;
+  font-weight: 700;
+  color: #dc2626;
+  margin: 0;
+}
+
+.errorDescription {
+  font-size: 15px;
+  color: #666;
+  margin: 0;
+  line-height: 1.6;
+  max-width: 320px;
+}
+
+.buttonWrapper {
+  margin-top: 24px;
+  width: 100%;
+  max-width: 280px;
+}
+
+.fadeIn {
+  animation: fadeIn 250ms ease forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 480px) {
+  .card {
+    padding: 32px 24px;
+  }
+}

@@ -33,5 +33,9 @@
     "devDependencies": {
         "@types/pg": "^8.20.0",
         "drizzle-kit": "^1.0.0-rc.4"
+    },
+    "allowScripts": {
+        "bcrypt@6.0.0": true,
+        "esbuild@0.25.12": true
     }
 }

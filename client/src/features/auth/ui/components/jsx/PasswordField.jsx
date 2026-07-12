@@ -1,20 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useState, forwardRef } from "react";
 import { LuLock, LuEye, LuEyeOff } from "react-icons/lu";
 import InputField from "./InputField";
 import styles from "../css/PasswordField.module.css";
 
-export default function PasswordField({
+const PasswordField = forwardRef(function PasswordField({
   label,
   placeholder,
   value,
   onChange,
+  onBlur,
   error,
   required,
   disabled,
   name,
-}) {
+}, ref) {
   const [visible, setVisible] = useState(false);
 
   const toggleButton = (
@@ -30,6 +31,7 @@ export default function PasswordField({
 
   return (
     <InputField
+      ref={ref}
       label={label}
       type={visible ? "text" : "password"}
       placeholder={placeholder}
@@ -37,10 +39,13 @@ export default function PasswordField({
       endIcon={toggleButton}
       value={value}
       onChange={onChange}
+      onBlur={onBlur}
       error={error}
       required={required}
       disabled={disabled}
       name={name}
     />
   );
-}
+});
+
+export default PasswordField;

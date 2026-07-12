@@ -19,3 +19,4 @@ export { default as Loader } from "./Loader";
 export { default as DemoAccounts } from "./DemoAccounts";
 export { default as DemoAccountItem } from "./DemoAccountItem";
 export { default as ForgotPasswordLink } from "./ForgotPasswordLink";
+export { default as SuccessMessage } from "./SuccessMessage";
