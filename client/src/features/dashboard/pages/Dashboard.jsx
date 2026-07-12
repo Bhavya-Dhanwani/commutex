@@ -66,6 +66,8 @@ export default function Dashboard() {
   const [tabData, setTabData] = useState([]);
   const [tabLoading, setTabLoading] = useState(false);
   const [tabError, setTabError] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterStatus, setFilterStatus] = useState("");
 
   // CRUD popup modal states
   const [activeModal, setActiveModal] = useState(null); // 'vehicle' | 'driver'
@@ -319,6 +321,12 @@ export default function Dashboard() {
     checkUserSession();
   }, [user, dispatch, router]);
 
+  // Reset search and filters on tab changes
+  useEffect(() => {
+    setSearchQuery("");
+    setFilterStatus("");
+  }, [currentTab]);
+
   // Handle automatic data fetching for managed tabs
   useEffect(() => {
     if (currentTab === "dashboard" || currentTab === "settings") {
@@ -328,29 +336,32 @@ export default function Dashboard() {
     const loadData = async () => {
       setTabLoading(true);
       setTabError("");
-      setTabData([]);
+
+      const params = {};
+      if (searchQuery) params.search = searchQuery;
+      if (filterStatus) params.status = filterStatus;
 
       try {
         if (currentTab === "vehicles") {
-          const res = await fetchVehicles();
+          const res = await fetchVehicles(params);
           setTabData(res.vehicles || res.data?.vehicles || []);
         } else if (currentTab === "drivers") {
-          const res = await fetchDrivers();
+          const res = await fetchDrivers(params);
           setTabData(res.drivers || res.data?.drivers || []);
         } else if (currentTab === "users") {
-          const res = await fetchUsers();
+          const res = await fetchUsers(params);
           setTabData(res.users || res.data?.users || []);
         } else if (currentTab === "trips") {
-          const res = await fetchTrips();
+          const res = await fetchTrips(params);
           setTabData(res.trips || res.data?.trips || []);
         } else if (currentTab === "maintenance") {
-          const res = await fetchMaintenanceLogs();
+          const res = await fetchMaintenanceLogs(params);
           setTabData(res.maintenanceLogs || res.data?.maintenanceLogs || []);
         } else if (currentTab === "fuel") {
-          const res = await fetchFuelLogs();
+          const res = await fetchFuelLogs(params);
           setTabData(res.fuelLogs || res.data?.fuelLogs || []);
         } else if (currentTab === "expenses") {
-          const res = await fetchExpenses();
+          const res = await fetchExpenses(params);
           setTabData(res.expenses || res.data?.expenses || []);
         }
       } catch (err) {
@@ -369,7 +380,7 @@ export default function Dashboard() {
     };
 
     loadData();
-  }, [currentTab]);
+  }, [currentTab, searchQuery, filterStatus]);
 
   const handleRoleChange = async (userId, newRole) => {
     try {
@@ -395,9 +406,69 @@ export default function Dashboard() {
 
   const role = user?.role || "User";
 
+  const renderFilterDropdown = () => {
+    let options = [];
+    let placeholder = "All Statuses";
+
+    if (currentTab === "vehicles") {
+      options = ["Available", "On Trip", "In Shop", "Retired"];
+    } else if (currentTab === "drivers") {
+      options = ["Available", "On Trip", "Inactive"];
+    } else if (currentTab === "trips") {
+      options = ["Draft", "Dispatched", "Completed", "Cancelled"];
+    } else if (currentTab === "maintenance") {
+      options = ["Active", "Completed"];
+    } else if (currentTab === "expenses") {
+      options = ["Fuel", "Maintenance", "Toll", "Parking", "Insurance", "Fine", "Other"];
+      placeholder = "All Categories";
+    } else if (currentTab === "users") {
+      options = ["Admin", "Fleet Manager", "Dispatcher", "Safety Officer", "Financial Analyst", "User"];
+      placeholder = "All Roles";
+    } else {
+      return null;
+    }
+
+    return (
+      <select
+        value={filterStatus}
+        onChange={(e) => setFilterStatus(e.target.value)}
+        style={{
+          padding: "8px 14px",
+          border: "1px solid #E7E7E7",
+          borderRadius: "10px",
+          fontSize: "13px",
+          outline: "none",
+          backgroundColor: "#FFFFFF",
+          color: "#111111",
+          cursor: "pointer",
+        }}
+      >
+        <option value="">{placeholder}</option>
+        {options.map((opt) => (
+          <option key={opt} value={opt}>
+            {opt}
+          </option>
+        ))}
+      </select>
+    );
+  };
+
   const renderTabContent = () => {
     // Check if the current tab is an integrated data tab
     const isDataTab = ["vehicles", "drivers", "users", "trips", "maintenance", "fuel", "expenses"].includes(currentTab);
+
+    // Apply local query/filter constraints as fallback (shadowing outer tabData)
+    let filteredList = tabData || [];
+    if (filterStatus) {
+      if (currentTab === "expenses") {
+        filteredList = filteredList.filter((item) => item.category === filterStatus);
+      } else if (currentTab === "users") {
+        filteredList = filteredList.filter((item) => item.role === filterStatus);
+      } else {
+        filteredList = filteredList.filter((item) => item.status === filterStatus);
+      }
+    }
+    const tabData = filteredList;
 
     if (!isDataTab) {
       if (currentTab === "settings") {
@@ -481,12 +552,34 @@ export default function Dashboard() {
 
     return (
       <div className={styles.workspaceCard}>
-        <div className={styles.cardHeader} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px" }}>
-          <div>
-            <h2 className={styles.cardTitle}>{currentTab.charAt(0).toUpperCase() + currentTab.slice(1)} Hub</h2>
-            <span style={{ fontSize: "12px", color: "#666666", fontWeight: 500 }}>
-              {tabData.length} records found
-            </span>
+        <div className={styles.cardHeader} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "16px" }}>
+          <div style={{ display: "flex", gap: "24px", alignItems: "center", flexWrap: "wrap" }}>
+            <div>
+              <h2 className={styles.cardTitle}>{currentTab.charAt(0).toUpperCase() + currentTab.slice(1)} Hub</h2>
+              <span style={{ fontSize: "12px", color: "#666666", fontWeight: 500 }}>
+                {tabData.length} records found
+              </span>
+            </div>
+            
+            <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+              <input
+                type="text"
+                placeholder={`Search ${currentTab}...`}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                style={{
+                  padding: "6px 12px",
+                  border: "1px solid #E7E7E7",
+                  borderRadius: "8px",
+                  fontSize: "12px",
+                  outline: "none",
+                  width: "160px",
+                  backgroundColor: "#FFFFFF",
+                  color: "#111111",
+                }}
+              />
+              {renderFilterDropdown()}
+            </div>
           </div>
           {currentTab === "vehicles" && (
             <button
@@ -1294,56 +1387,7 @@ export default function Dashboard() {
             ]} />
           </div>
         );
-      case "Financial Analyst":
-        return (
-          <div className={styles.dashboardGrid}>
-            {/* Pending Fuel Bills Table */}
-            <div className={styles.tableCard}>
-              <div className={styles.cardHeader}>
-                <h3 className={styles.cardTitle}>Pending Fuel Bills</h3>
-              </div>
-              <div className={styles.tableWrapper}>
-                <table className={styles.table}>
-                  <thead>
-                    <tr>
-                      <th>Ref ID</th>
-                      <th>Type</th>
-                      <th>Amount</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td style={{ fontWeight: 600 }}>EXP-401</td>
-                      <td>Diesel Fuel Log</td>
-                      <td>₹12,400</td>
-                      <td>
-                        <span className={`${styles.statusBadge} ${styles.statusWarning}`}>Awaiting Review</span>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td style={{ fontWeight: 600 }}>EXP-400</td>
-                      <td>Maintenance Billing</td>
-                      <td>₹18,000</td>
-                      <td>
-                        <span className={`${styles.statusBadge} ${styles.statusSuccess}`}>Approved</span>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td style={{ fontWeight: 600 }}>EXP-399</td>
-                      <td>Toll Expenses</td>
-                      <td>₹3,500</td>
-                      <td>
-                        <span className={`${styles.statusBadge} ${styles.statusSuccess}`}>Approved</span>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-            <ActivityFeed activities={activities} />
-          </div>
-        );
+
       default:
         return (
           <div className={styles.dashboardGrid}>

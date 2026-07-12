@@ -1,7 +1,7 @@
 import api from "@/lib/api";
 
-export default async function fetchVehicles() {
-  const response = await api.get("/vehicles");
+export default async function fetchVehicles(params) {
+  const response = await api.get("/vehicles", { params });
   return response.data;
 }
 

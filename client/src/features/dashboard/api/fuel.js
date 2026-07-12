@@ -1,7 +1,7 @@
 import api from "@/lib/api";
 
-export default async function fetchFuelLogs() {
-  const response = await api.get("/fuel-logs");
+export default async function fetchFuelLogs(params) {
+  const response = await api.get("/fuel-logs", { params });
   return response.data;
 }
 

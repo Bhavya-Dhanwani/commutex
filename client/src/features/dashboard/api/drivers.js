@@ -1,7 +1,7 @@
 import api from "@/lib/api";
 
-export default async function fetchDrivers() {
-  const response = await api.get("/drivers");
+export default async function fetchDrivers(params) {
+  const response = await api.get("/drivers", { params });
   return response.data;
 }
 

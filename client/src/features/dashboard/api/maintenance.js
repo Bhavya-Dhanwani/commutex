@@ -1,7 +1,7 @@
 import api from "@/lib/api";
 
-export default async function fetchMaintenanceLogs() {
-  const response = await api.get("/maintenance");
+export default async function fetchMaintenanceLogs(params) {
+  const response = await api.get("/maintenance", { params });
   return response.data;
 }
 

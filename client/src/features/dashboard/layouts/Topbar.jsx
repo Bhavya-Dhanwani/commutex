@@ -1,11 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { LuBell, LuMoon, LuSun, LuMenu } from "react-icons/lu";
 import { toast } from "react-toastify";
 
 import styles from "../styles/Topbar.module.css";
-import SearchBar from "../components/SearchBar";
 import UserMenu from "../components/UserMenu";
 import NotificationCard from "../components/NotificationCard";
 
@@ -13,10 +12,19 @@ export default function Topbar({ user, onMenuToggle }) {
   const [theme, setTheme] = useState("light");
   const [showNotifications, setShowNotifications] = useState(false);
 
+  // Initialize theme from local storage
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("theme") || "light";
+    setTheme(savedTheme);
+    document.documentElement.setAttribute("data-theme", savedTheme);
+  }, []);
+
   const toggleTheme = () => {
     const newTheme = theme === "light" ? "dark" : "light";
     setTheme(newTheme);
-    toast.info(`Theme toggled to ${newTheme} (Demo)`);
+    localStorage.setItem("theme", newTheme);
+    document.documentElement.setAttribute("data-theme", newTheme);
+    toast.success(`Theme toggled to ${newTheme} mode`);
   };
 
   return (
@@ -25,7 +33,6 @@ export default function Topbar({ user, onMenuToggle }) {
         <button type="button" className={styles.menuToggle} onClick={onMenuToggle}>
           <LuMenu />
         </button>
-        <SearchBar />
       </div>
 
       <div className={styles.rightSection}>

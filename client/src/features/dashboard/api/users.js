@@ -1,7 +1,7 @@
 import api from "@/lib/api";
 
-export default async function fetchUsers() {
-  const response = await api.get("/users");
+export default async function fetchUsers(params) {
+  const response = await api.get("/users", { params });
   return response.data;
 }
 
