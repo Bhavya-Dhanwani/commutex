@@ -37,6 +37,9 @@ app.use("/api/drivers", driverRoutes);
 import tripRoutes from "./modules/trip/routes.js";
 app.use("/api/trips", tripRoutes);
 
+import maintenanceRoutes from "./modules/maintenance/routes.js";
+app.use("/api/maintenance", maintenanceRoutes);
+
 // catch-all route
 import ApiError from "./utils/ApiError.js";
 app.all("{*path}", (req, res) => {
