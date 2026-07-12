@@ -61,3 +61,12 @@ export function requireFleetManagerOrAdmin(req, _res, next) {
 
     return next();
 }
+
+export function requireSafetyOfficerOrAdmin(req, _res, next) {
+    const role = req.user?.role;
+    if (role !== "Safety Officer" && role !== "Admin") {
+        return next(ApiError.forbidden("Access denied: Safety Officer or Admin role required"));
+    }
+
+    return next();
+}
