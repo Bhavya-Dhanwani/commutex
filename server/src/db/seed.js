@@ -8,6 +8,12 @@ import db from "./index.js";
 import { users } from "./schemas/user.js";
 import { roles } from "./schemas/role.js";
 import { permissions } from "./schemas/permission.js";
+import { vehicles } from "./schemas/vehicle.js";
+import { drivers } from "./schemas/driver.js";
+import { trips } from "./schemas/trip.js";
+import { maintenanceLogs } from "./schemas/maintenance.js";
+import { fuelLogs } from "./schemas/fuelLog.js";
+import { expenses } from "./schemas/expense.js";
 
 const demoPassword = "Demo@123";
 
@@ -76,6 +82,18 @@ const defaultPermissions = {
 };
 
 export async function seedUsers() {
+    console.log("Emptying database...");
+    await db.delete(expenses);
+    await db.delete(fuelLogs);
+    await db.delete(maintenanceLogs);
+    await db.delete(trips);
+    await db.delete(vehicles);
+    await db.delete(drivers);
+    await db.delete(users);
+    await db.delete(permissions);
+    await db.delete(roles);
+    console.log("Database cleared.");
+
     console.log("Seeding roles and permissions...");
 
     // Seed roles
