@@ -1,4 +1,4 @@
-import { eq, and, ne } from "drizzle-orm";
+import { eq, and, ne, or, ilike } from "drizzle-orm";
 
 import db from "../../db/index.js";
 import { vehicles } from "../../db/schemas/vehicle.js";
@@ -6,7 +6,22 @@ import ApiError from "../../utils/ApiError.js";
 import ApiResponse from "../../utils/ApiResponse.js";
 
 export async function getVehicles(req, res) {
-    const list = await db.select().from(vehicles);
+    const { search } = req.query;
+
+    let query = db.select().from(vehicles);
+
+    if (search) {
+        query = query.where(
+            or(
+                ilike(vehicles.registrationNumber, `%${search}%`),
+                ilike(vehicles.model, `%${search}%`),
+                ilike(vehicles.region, `%${search}%`),
+                ilike(vehicles.notes, `%${search}%`)
+            )
+        );
+    }
+
+    const list = await query;
 
     return ApiResponse.ok(res, "Vehicles fetched successfully", {
         vehicles: list,

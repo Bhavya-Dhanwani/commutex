@@ -1,4 +1,4 @@
-import { eq, and, ne } from "drizzle-orm";
+import { eq, and, ne, or, ilike } from "drizzle-orm";
 
 import db from "../../db/index.js";
 import { trips } from "../../db/schemas/trip.js";
@@ -9,7 +9,22 @@ import ApiError from "../../utils/ApiError.js";
 import ApiResponse from "../../utils/ApiResponse.js";
 
 export async function getTrips(req, res) {
-    const list = await db.select().from(trips);
+    const { search } = req.query;
+
+    let query = db.select().from(trips);
+
+    if (search) {
+        query = query.where(
+            or(
+                ilike(trips.tripNumber, `%${search}%`),
+                ilike(trips.source, `%${search}%`),
+                ilike(trips.destination, `%${search}%`),
+                ilike(trips.remarks, `%${search}%`)
+            )
+        );
+    }
+
+    const list = await query;
 
     return ApiResponse.ok(res, "Trips fetched successfully", { trips: list });
 }

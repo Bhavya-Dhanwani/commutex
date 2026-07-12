@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, or, ilike } from "drizzle-orm";
 
 import db from "../../db/index.js";
 import { fuelLogs } from "../../db/schemas/fuelLog.js";
@@ -8,9 +8,17 @@ import ApiError from "../../utils/ApiError.js";
 import ApiResponse from "../../utils/ApiResponse.js";
 
 export async function getFuelLogs(req, res) {
-    const list = await db
-        .select()
-        .from(fuelLogs);
+    const { search } = req.query;
+
+    let query = db.select().from(fuelLogs);
+
+    if (search) {
+        query = query.where(
+            ilike(fuelLogs.fuelStation, `%${search}%`)
+        );
+    }
+
+    const list = await query;
 
     return ApiResponse.ok(res, "Fuel logs fetched successfully", { fuelLogs: list });
 }

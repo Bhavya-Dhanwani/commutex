@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, or, ilike } from "drizzle-orm";
 
 import db from "../../db/index.js";
 import { users } from "../../db/schemas/user.js";
@@ -7,7 +7,9 @@ import ApiError from "../../utils/ApiError.js";
 import ApiResponse from "../../utils/ApiResponse.js";
 
 export async function getAllUsers(req, res) {
-    const allUsers = await db
+    const { search } = req.query;
+
+    let query = db
         .select({
             id: users.id,
             name: users.name,
@@ -18,6 +20,17 @@ export async function getAllUsers(req, res) {
             updatedAt: users.updatedAt,
         })
         .from(users);
+
+    if (search) {
+        query = query.where(
+            or(
+                ilike(users.name, `%${search}%`),
+                ilike(users.email, `%${search}%`)
+            )
+        );
+    }
+
+    const allUsers = await query;
 
     return ApiResponse.ok(res, "Users fetched successfully", {
         users: allUsers,

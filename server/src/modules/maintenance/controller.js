@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, or, ilike } from "drizzle-orm";
 
 import db from "../../db/index.js";
 import { maintenanceLogs } from "../../db/schemas/maintenance.js";
@@ -7,7 +7,21 @@ import ApiError from "../../utils/ApiError.js";
 import ApiResponse from "../../utils/ApiResponse.js";
 
 export async function getMaintenanceLogs(req, res) {
-    const list = await db.select().from(maintenanceLogs);
+    const { search } = req.query;
+
+    let query = db.select().from(maintenanceLogs);
+
+    if (search) {
+        query = query.where(
+            or(
+                ilike(maintenanceLogs.maintenanceType, `%${search}%`),
+                ilike(maintenanceLogs.description, `%${search}%`),
+                ilike(maintenanceLogs.workshop, `%${search}%`)
+            )
+        );
+    }
+
+    const list = await query;
 
     return ApiResponse.ok(res, "Maintenance logs fetched successfully", {
         maintenanceLogs: list,

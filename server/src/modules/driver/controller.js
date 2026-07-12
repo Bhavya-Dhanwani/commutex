@@ -1,4 +1,4 @@
-import { eq, and, ne } from "drizzle-orm";
+import { eq, and, ne, or, ilike } from "drizzle-orm";
 
 import db from "../../db/index.js";
 import { drivers } from "../../db/schemas/driver.js";
@@ -6,7 +6,23 @@ import ApiError from "../../utils/ApiError.js";
 import ApiResponse from "../../utils/ApiResponse.js";
 
 export async function getDrivers(req, res) {
-    const list = await db.select().from(drivers);
+    const { search } = req.query;
+
+    let query = db.select().from(drivers);
+
+    if (search) {
+        query = query.where(
+            or(
+                ilike(drivers.name, `%${search}%`),
+                ilike(drivers.employeeId, `%${search}%`),
+                ilike(drivers.phone, `%${search}%`),
+                ilike(drivers.email, `%${search}%`),
+                ilike(drivers.licenseNumber, `%${search}%`)
+            )
+        );
+    }
+
+    const list = await query;
 
     return ApiResponse.ok(res, "Drivers fetched successfully", {
         drivers: list,
