@@ -37,7 +37,7 @@ export default function Sidebar({ role, isOpen, onClose, currentTab, onTabChange
 
   // Menu items visibility rule based on user role
   const getVisibleMenu = () => {
-    const baseMenu = [{ id: "dashboard", label: "Dashboard", icon: LuLayoutDashboard }];
+    const baseMenu = [{ id: "dashboard", label: "Analytics", icon: LuLayoutDashboard }];
 
     switch (role) {
       case "Admin":
@@ -49,9 +49,6 @@ export default function Sidebar({ role, isOpen, onClose, currentTab, onTabChange
           { id: "maintenance", label: "Maintenance", icon: LuWrench },
           { id: "fuel", label: "Fuel", icon: LuFuel },
           { id: "expenses", label: "Expenses", icon: LuChartColumn },
-          { id: "compliance", label: "Compliance", icon: LuCircleCheck },
-          { id: "incidents", label: "Incidents", icon: LuTriangleAlert },
-          { id: "analytics", label: "Analytics", icon: LuChartColumn },
           { id: "users", label: "Users", icon: LuUsers },
           { id: "settings", label: "Settings", icon: LuSettings },
         ];
@@ -73,8 +70,6 @@ export default function Sidebar({ role, isOpen, onClose, currentTab, onTabChange
         return [
           ...baseMenu,
           { id: "drivers", label: "Drivers", icon: LuUsers },
-          { id: "compliance", label: "Compliance", icon: LuCircleCheck },
-          { id: "incidents", label: "Incidents", icon: LuTriangleAlert },
           { id: "settings", label: "Settings", icon: LuSettings },
         ];
       case "Financial Analyst":
@@ -82,7 +77,6 @@ export default function Sidebar({ role, isOpen, onClose, currentTab, onTabChange
           ...baseMenu,
           { id: "fuel", label: "Fuel", icon: LuFuel },
           { id: "expenses", label: "Expenses", icon: LuChartColumn },
-          { id: "analytics", label: "Analytics", icon: LuChartColumn },
           { id: "settings", label: "Settings", icon: LuSettings },
         ];
       case "User":

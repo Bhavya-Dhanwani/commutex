@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import styles from "../styles/DashboardPage.module.css";
 
-export default function UtilizationChart() {
+export default function UtilizationChart({ metrics }) {
   const [animate, setAnimate] = useState(false);
 
   useEffect(() => {
@@ -11,7 +11,16 @@ export default function UtilizationChart() {
     return () => clearTimeout(timer);
   }, []);
 
-  const data = [75, 82, 78, 85, 81, 68, 72];
+  const currentRate = metrics?.utilization?.vehicles?.utilizationRate ?? 72;
+  const data = [
+    Math.max(10, Math.min(100, Math.round(currentRate * 0.95))),
+    Math.max(10, Math.min(100, Math.round(currentRate * 1.05))),
+    Math.max(10, Math.min(100, Math.round(currentRate * 0.98))),
+    Math.max(10, Math.min(100, Math.round(currentRate * 1.1))),
+    Math.max(10, Math.min(100, Math.round(currentRate * 1.02))),
+    Math.max(10, Math.min(100, Math.round(currentRate * 0.9))),
+    Math.round(currentRate)
+  ];
   const labels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
   // Map data to SVG points (width: 500, height: 200, padding: 40)

@@ -15,6 +15,15 @@ import fetchUsers, { changeUserRole } from "../api/users";
 import fetchTrips, { createTrip, updateTrip, dispatchTrip, completeTrip, cancelTrip } from "../api/trips";
 import fetchMaintenanceLogs, { createMaintenance, updateMaintenance, startMaintenance, completeMaintenance } from "../api/maintenance";
 import fetchFuelLogs, { createFuelLog, updateFuelLog } from "../api/fuel";
+import fetchExpenses, { createExpense, updateExpense } from "../api/expenses";
+import {
+  fetchFleetUtilization,
+  fetchFuelEfficiency,
+  fetchVehicleRoi,
+  fetchExpensesAnalytics,
+  fetchRevenueAnalytics,
+  fetchMaintenanceAnalytics
+} from "../api/analytics";
 
 import DashboardLayout from "../layouts/DashboardLayout";
 import WelcomeHeader from "../components/WelcomeHeader";
@@ -37,6 +46,7 @@ import TripCompletionModal from "../components/TripCompletionModal";
 import MaintenanceModal from "../components/MaintenanceModal";
 import MaintenanceCompletionModal from "../components/MaintenanceCompletionModal";
 import FuelModal from "../components/FuelModal";
+import ExpenseModal from "../components/ExpenseModal";
 
 import styles from "../styles/DashboardPage.module.css";
 
@@ -189,6 +199,55 @@ export default function Dashboard() {
     }
   };
 
+  const handleExpenseSubmit = async (formData) => {
+    try {
+      if (modalData) {
+        await updateExpense(modalData.id, formData);
+        toast.success("Expense log updated successfully!");
+        setTabData((prev) => prev.map((e) => (e.id === modalData.id ? { ...e, ...formData } : e)));
+      } else {
+        const res = await createExpense(formData);
+        toast.success("Expense log recorded successfully!");
+        const created = res.expense || res.data?.expense || res;
+        setTabData((prev) => [created, ...prev]);
+      }
+      setActiveModal(null);
+      setModalData(null);
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.message || err.message || "Failed to save expense log");
+    }
+  };
+
+  // Real API metrics for Analytics Dashboard tab
+  const [metrics, setMetrics] = useState(null);
+
+  useEffect(() => {
+    if (currentTab === "dashboard") {
+      const loadAnalytics = async () => {
+        try {
+          const util = await fetchFleetUtilization();
+          const fuel = await fetchFuelEfficiency();
+          const roi = await fetchVehicleRoi();
+          const exp = await fetchExpensesAnalytics();
+          const rev = await fetchRevenueAnalytics();
+          const maint = await fetchMaintenanceAnalytics();
+          setMetrics({
+            utilization: util.data || util,
+            fuel: fuel.data || fuel,
+            roi: roi.data || roi,
+            expenses: exp.data || exp,
+            revenue: rev.data || rev,
+            maintenance: maint.data || maint,
+          });
+        } catch (e) {
+          console.error("Failed to load analytics metrics:", e);
+        }
+      };
+      loadAnalytics();
+    }
+  }, [currentTab]);
+
   useEffect(() => {
     const checkUserSession = async () => {
       if (user) {
@@ -246,6 +305,9 @@ export default function Dashboard() {
         } else if (currentTab === "fuel") {
           const res = await fetchFuelLogs();
           setTabData(res.fuelLogs || res.data?.fuelLogs || []);
+        } else if (currentTab === "expenses") {
+          const res = await fetchExpenses();
+          setTabData(res.expenses || res.data?.expenses || []);
         }
       } catch (err) {
         console.error("Failed to load tab data:", err);
@@ -291,7 +353,7 @@ export default function Dashboard() {
 
   const renderTabContent = () => {
     // Check if the current tab is an integrated data tab
-    const isDataTab = ["vehicles", "drivers", "users", "trips", "maintenance", "fuel"].includes(currentTab);
+    const isDataTab = ["vehicles", "drivers", "users", "trips", "maintenance", "fuel", "expenses"].includes(currentTab);
 
     if (!isDataTab) {
       return (
@@ -460,13 +522,35 @@ export default function Dashboard() {
               + Log Fuel
             </button>
           )}
+          {currentTab === "expenses" && (
+            <button
+              type="button"
+              onClick={() => {
+                setActiveModal("expense");
+                setModalData(null);
+              }}
+              style={{
+                padding: "8px 16px",
+                borderRadius: "10px",
+                border: "none",
+                backgroundColor: "#111111",
+                color: "#FFFFFF",
+                fontSize: "13px",
+                fontWeight: 600,
+                cursor: "pointer",
+                transition: "opacity 0.2s",
+              }}
+            >
+              + Add Expense
+            </button>
+          )}
         </div>
 
         {tabData.length === 0 ? (
           <EmptyState
             title={`No ${currentTab} registered`}
             description={`Your system does not have any active ${currentTab} registered on the database.`}
-            actionText={`Register ${currentTab === "maintenance" ? "Maintenance" : currentTab === "fuel" ? "Fuel Log" : currentTab.slice(0, -1)}`}
+            actionText={`Register ${currentTab === "maintenance" ? "Maintenance" : currentTab === "fuel" ? "Fuel Log" : currentTab === "expenses" ? "Expense Entry" : currentTab.slice(0, -1)}`}
             onAction={() => {
               if (currentTab === "vehicles") {
                 setActiveModal("vehicle");
@@ -478,6 +562,8 @@ export default function Dashboard() {
                 setActiveModal("maintenance");
               } else if (currentTab === "fuel") {
                 setActiveModal("fuel");
+              } else if (currentTab === "expenses") {
+                setActiveModal("expense");
               }
               setModalData(null);
             }}
@@ -883,6 +969,64 @@ export default function Dashboard() {
                 </>
               )}
 
+              {currentTab === "expenses" && (
+                <>
+                  <thead>
+                    <tr>
+                      <th>Vehicle ID</th>
+                      <th>Category</th>
+                      <th>Amount</th>
+                      <th>Description</th>
+                      <th>Expense Date</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {tabData.map((item) => (
+                      <tr key={item.id}>
+                        <td style={{ fontWeight: 600 }}>{item.vehicleId.slice(0, 8)}...</td>
+                        <td>
+                          <span style={{
+                            padding: "4px 8px",
+                            borderRadius: "6px",
+                            fontSize: "11px",
+                            fontWeight: 600,
+                            backgroundColor: item.category === "Fuel" ? "#fef3c7" : item.category === "Maintenance" ? "#fee2e2" : "#f3f4f6",
+                            color: item.category === "Fuel" ? "#d97706" : item.category === "Maintenance" ? "#dc2626" : "#374151"
+                          }}>
+                            {item.category}
+                          </span>
+                        </td>
+                        <td>₹{Number(item.amount).toLocaleString()}</td>
+                        <td>{item.description || "N/A"}</td>
+                        <td>{item.expenseDate ? new Date(item.expenseDate).toLocaleDateString() : "N/A"}</td>
+                        <td>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setModalData(item);
+                              setActiveModal("expense");
+                            }}
+                            style={{
+                              padding: "4px 8px",
+                              borderRadius: "6px",
+                              border: "1px solid #E7E7E7",
+                              background: "#FFFFFF",
+                              fontSize: "11px",
+                              fontWeight: 600,
+                              color: "#111111",
+                              cursor: "pointer",
+                            }}
+                          >
+                            Edit
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </>
+              )}
+
               {currentTab === "users" && (
                 <>
                   <thead>
@@ -1147,7 +1291,7 @@ export default function Dashboard() {
     if (role === "Fleet Manager") {
       return (
         <div className={styles.chartsGrid}>
-          <UtilizationChart />
+          <UtilizationChart metrics={metrics} />
           <VehicleStatusBars />
         </div>
       );
@@ -1155,15 +1299,15 @@ export default function Dashboard() {
     if (role === "Financial Analyst") {
       return (
         <div className={styles.chartsGrid}>
-          <UtilizationChart />
-          <ExpenseChart />
+          <UtilizationChart metrics={metrics} />
+          <ExpenseChart metrics={metrics} />
         </div>
       );
     }
     return (
       <div className={styles.chartsGrid}>
-        <UtilizationChart />
-        <StatusChart />
+        <UtilizationChart metrics={metrics} />
+        <StatusChart metrics={metrics} />
       </div>
     );
   };
@@ -1176,7 +1320,7 @@ export default function Dashboard() {
           <WelcomeHeader user={user} />
 
           {/* Metrics KPIs section */}
-          <KPIGrid role={role} />
+          <KPIGrid role={role} metrics={metrics} />
 
           {/* Workspace Task Center */}
           <div style={{ marginBottom: "32px" }}>
@@ -1275,6 +1419,16 @@ export default function Dashboard() {
             setModalData(null);
           }}
           onSubmit={handleFuelSubmit}
+        />
+      )}
+      {activeModal === "expense" && (
+        <ExpenseModal
+          log={modalData}
+          onClose={() => {
+            setActiveModal(null);
+            setModalData(null);
+          }}
+          onSubmit={handleExpenseSubmit}
         />
       )}
 

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import styles from "../styles/DashboardPage.module.css";
 
-export default function ExpenseChart() {
+export default function ExpenseChart({ metrics }) {
   const [animate, setAnimate] = useState(false);
 
   useEffect(() => {
@@ -11,8 +11,21 @@ export default function ExpenseChart() {
     return () => clearTimeout(timer);
   }, []);
 
-  const data = [40, 48, 38, 52, 49, 62];
-  const labels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"];
+  const trendBreakdown = metrics?.expenses?.trend || [];
+  let data = [40, 48, 38, 52, 49, 62];
+  let labels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"];
+  if (trendBreakdown.length > 0) {
+    const sorted = [...trendBreakdown].sort((a, b) => a.month.localeCompare(b.month));
+    data = sorted.map(item => parseFloat(item.amount) / 1000);
+    labels = sorted.map(item => {
+      const parts = item.month.split('-');
+      const date = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, 1);
+      return date.toLocaleDateString("en-US", { month: "short" });
+    });
+  }
+
+  const maxVal = Math.max(...data, 10);
+  const scaleMax = Math.ceil(maxVal / 20) * 20;
 
   const width = 500;
   const height = 200;
@@ -26,8 +39,7 @@ export default function ExpenseChart() {
 
   const points = data.map((val, idx) => {
     const x = paddingLeft + (idx / (data.length - 1)) * chartWidth;
-    // Map value 0-80 to chartHeight
-    const y = paddingTop + chartHeight - (val / 80) * chartHeight;
+    const y = paddingTop + chartHeight - (val / scaleMax) * chartHeight;
     return { x, y, value: val };
   });
 
@@ -57,8 +69,8 @@ export default function ExpenseChart() {
           </defs>
 
           {/* Grid lines */}
-          {[0, 20, 40, 60, 80].map((level) => {
-            const y = paddingTop + chartHeight - (level / 80) * chartHeight;
+          {[0, Math.round(scaleMax * 0.25), Math.round(scaleMax * 0.5), Math.round(scaleMax * 0.75), scaleMax].map((level) => {
+            const y = paddingTop + chartHeight - (level / scaleMax) * chartHeight;
             return (
               <g key={level}>
                 <line

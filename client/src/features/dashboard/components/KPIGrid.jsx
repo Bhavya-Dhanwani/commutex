@@ -14,43 +14,55 @@ import {
   LuChartColumn
 } from "react-icons/lu";
 
-export default function KPIGrid({ role }) {
+export default function KPIGrid({ role, metrics }) {
   const getKPIs = () => {
+    const utilRate = metrics?.utilization?.vehicles?.utilizationRate;
+    const totalVehicles = metrics?.utilization?.vehicles?.total;
+    const onTrip = metrics?.utilization?.vehicles?.byStatus?.["On Trip"];
+    const available = metrics?.utilization?.vehicles?.byStatus?.["Available"];
+    const inShop = metrics?.utilization?.vehicles?.byStatus?.["In Shop"];
+    const totalTrips = metrics?.utilization?.trips?.total;
+    const draftTrips = metrics?.utilization?.trips?.byStatus?.["Draft"];
+    const dispTrips = metrics?.utilization?.trips?.byStatus?.["Dispatched"];
+    const expensesSum = metrics?.expenses?.totalExpenses;
+    const revenueSum = metrics?.revenue?.totalRevenue;
+    const avgFuelEff = metrics?.fuel?.averageKmPerLiter;
+
     switch (role) {
       case "Fleet Manager":
         return [
-          { title: "Active Vehicles", value: "53", change: "+4% from last week", isPositive: true, icon: LuTruck },
-          { title: "Fleet Utilization", value: "81%", change: "+2.5% from yesterday", isPositive: true, icon: LuChartColumn },
-          { title: "Drivers Online", value: "26", change: "+2 new registrations", isPositive: true, icon: LuUsers },
-          { title: "Pending Service", value: "5", change: "-2 resolved today", isPositive: true, icon: LuWrench },
+          { title: "Active Vehicles (On Trip)", value: onTrip !== undefined ? String(onTrip) : "53", change: `Total: ${totalVehicles || 0} registered`, isPositive: true, icon: LuTruck },
+          { title: "Fleet Utilization", value: utilRate !== undefined ? `${utilRate}%` : "81%", change: "Based on active vehicles", isPositive: true, icon: LuChartColumn },
+          { title: "Vehicles Available", value: available !== undefined ? String(available) : "32", change: "Ready to dispatch", isPositive: true, icon: LuUsers },
+          { title: "Pending Service (In Shop)", value: inShop !== undefined ? String(inShop) : "5", change: "In maintenance garage", isPositive: false, icon: LuWrench },
         ];
       case "Dispatcher":
         return [
-          { title: "Trips Today", value: "18", change: "+12% vs last Monday", isPositive: true, icon: LuMapPinned },
-          { title: "Pending Dispatches", value: "4", change: "Need assignments", isPositive: false, icon: LuClock3 },
-          { title: "Drivers Online", value: "26", change: "4 on stand-by", isPositive: true, icon: LuUsers },
-          { title: "Vehicles Available", value: "32", change: "+5 returned", isPositive: true, icon: LuTruck },
+          { title: "Total Trips logged", value: totalTrips !== undefined ? String(totalTrips) : "18", change: `Dispatched: ${dispTrips || 0}`, isPositive: true, icon: LuMapPinned },
+          { title: "Draft / Pending Trips", value: draftTrips !== undefined ? String(draftTrips) : "4", change: "Need assignments", isPositive: false, icon: LuClock3 },
+          { title: "Vehicles Available", value: available !== undefined ? String(available) : "32", change: "Ready to dispatch", isPositive: true, icon: LuTruck },
+          { title: "Active Vehicles", value: onTrip !== undefined ? String(onTrip) : "53", change: `Total: ${totalVehicles || 0}`, isPositive: true, icon: LuTruck },
         ];
       case "Safety Officer":
         return [
-          { title: "Drivers Online", value: "26", change: "All active check-ins", isPositive: true, icon: LuUsers },
-          { title: "Compliance Score", value: "98%", change: "+0.5% this month", isPositive: true, icon: LuCircleCheck },
-          { title: "Active Incidents", value: "1", change: "Critical warning", isPositive: false, icon: LuTriangleAlert },
-          { title: "License Expirations", value: "3", change: "Due within 30 days", isPositive: false, icon: LuClock3 },
+          { title: "Active Vehicles", value: onTrip !== undefined ? String(onTrip) : "53", change: `Total: ${totalVehicles || 0}`, isPositive: true, icon: LuTruck },
+          { title: "Pending Service (In Shop)", value: inShop !== undefined ? String(inShop) : "5", change: "In maintenance garage", isPositive: false, icon: LuWrench },
+          { title: "Vehicles Available", value: available !== undefined ? String(available) : "32", change: "Ready to dispatch", isPositive: true, icon: LuTruck },
+          { title: "Total Trips logged", value: totalTrips !== undefined ? String(totalTrips) : "18", change: `Draft: ${draftTrips || 0}`, isPositive: true, icon: LuMapPinned },
         ];
       case "Financial Analyst":
         return [
-          { title: "Fuel Cost Today", value: "₹24,500", change: "-8% vs last week", isPositive: true, icon: LuIndianRupee },
-          { title: "Total Expenses", value: "₹1,12,000", change: "+15% budget utilization", isPositive: false, icon: LuChartColumn },
-          { title: "Avg Trip Cost", value: "₹4,800", change: "-2.4% avg drop-off", isPositive: true, icon: LuIndianRupee },
-          { title: "Monthly Budget Left", value: "64%", change: "On target with forecast", isPositive: true, icon: LuCircleCheck },
+          { title: "Total Fuel Efficiency", value: avgFuelEff !== undefined ? `${avgFuelEff} km/L` : "8.5 km/L", change: "Avg fleet performance", isPositive: true, icon: LuIndianRupee },
+          { title: "Total Logged Expenses", value: expensesSum !== undefined ? `₹${Number(expensesSum).toLocaleString()}` : "₹1,12,000", change: "Fuel & maintenance costs", isPositive: false, icon: LuChartColumn },
+          { title: "Total Revenue Logged", value: revenueSum !== undefined ? `₹${Number(revenueSum).toLocaleString()}` : "₹2,50,000", change: "From completed trips", isPositive: true, icon: LuIndianRupee },
+          { title: "Fleet Utilization", value: utilRate !== undefined ? `${utilRate}%` : "81%", change: "On target with forecast", isPositive: true, icon: LuCircleCheck },
         ];
       default:
         return [
-          { title: "Active Vehicles", value: "53", change: "+4% from last week", isPositive: true, icon: LuTruck },
-          { title: "Trips Today", value: "18", change: "+12% vs last Monday", isPositive: true, icon: LuMapPinned },
-          { title: "Drivers Online", value: "26", change: "+2 new registrations", isPositive: true, icon: LuUsers },
-          { title: "Fleet Utilization", value: "81%", change: "+2.5% from yesterday", isPositive: true, icon: LuChartColumn },
+          { title: "Active Vehicles", value: onTrip !== undefined ? String(onTrip) : "53", change: `Total: ${totalVehicles || 0}`, isPositive: true, icon: LuTruck },
+          { title: "Total Revenue Logged", value: revenueSum !== undefined ? `₹${Number(revenueSum).toLocaleString()}` : "₹2,50,000", change: "From completed trips", isPositive: true, icon: LuIndianRupee },
+          { title: "Total Logged Expenses", value: expensesSum !== undefined ? `₹${Number(expensesSum).toLocaleString()}` : "₹1,12,000", change: "Total recorded costs", isPositive: false, icon: LuChartColumn },
+          { title: "Fleet Utilization", value: utilRate !== undefined ? `${utilRate}%` : "81%", change: "Realtime usage index", isPositive: true, icon: LuChartColumn },
         ];
     }
   };

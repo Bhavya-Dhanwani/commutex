@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import styles from "../styles/DashboardPage.module.css";
 
-export default function StatusChart() {
+export default function StatusChart({ metrics }) {
   const [animate, setAnimate] = useState(false);
 
   useEffect(() => {
@@ -11,12 +11,22 @@ export default function StatusChart() {
     return () => clearTimeout(timer);
   }, []);
 
-  const total = 53;
+  const total = metrics?.utilization?.vehicles?.total ?? 53;
+  const statusCounts = metrics?.utilization?.vehicles?.byStatus || {
+    "On Trip": 35,
+    "In Shop": 12,
+    "Available": 6,
+  };
+
   const segments = [
-    { label: "Active", count: 35, color: "#111111" },
-    { label: "In Maintenance", count: 12, color: "#666666" },
-    { label: "Inactive", count: 6, color: "#E7E7E7" },
-  ];
+    { label: "Active", count: statusCounts["On Trip"] || 0, color: "#111111" },
+    { label: "In Maintenance", count: statusCounts["In Shop"] || 0, color: "#666666" },
+    { label: "Available", count: statusCounts["Available"] || 0, color: "#22c55e" },
+  ].filter(seg => total > 0 && seg.count > 0);
+
+  if (segments.length === 0) {
+    segments.push({ label: "No Vehicles", count: total || 1, color: "#E7E7E7" });
+  }
 
   // Circumference for r=50 is ~314.16
   const r = 50;
