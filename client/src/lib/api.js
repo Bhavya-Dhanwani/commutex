@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-    baseURL: process.env.BASE_URL || "http://localhost:5000/api",
+    baseURL: process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:5000/api",
     headers: {
         "Content-Type": "application/json",
     },
@@ -30,7 +30,7 @@ api.interceptors.response.use(
             originalRequest._retry = true;
 
             try {
-                const res = await axios.post(`${process.env.BASE_URL || "http://localhost:5000/api"}/auth/refresh`, {}, { withCredentials: true });
+                const res = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:5000/api"}/auth/refresh`, {}, { withCredentials: true });
                 const newToken = res.data.data.accessToken;
                 setApiAccessToken(newToken);
                 originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
