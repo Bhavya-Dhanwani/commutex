@@ -7,34 +7,40 @@ import styles from "../css/DemoAccounts.module.css";
 
 const demoAccounts = [
   {
-    role: "Administrator",
+    role: "Admin User",
     icon: "admin",
-    email: "admin@commutex.com",
-    password: "admin123",
+    email: "admin@commutex.local",
+    password: "demo@123",
   },
   {
     role: "Fleet Manager",
     icon: "fleet",
-    email: "fleet@commutex.com",
-    password: "fleet123",
+    email: "fleet.manager@commutex.local",
+    password: "demo@123",
   },
   {
     role: "Dispatcher",
     icon: "dispatcher",
-    email: "dispatch@commutex.com",
-    password: "dispatch123",
+    email: "dispatcher@commutex.local",
+    password: "demo@123",
   },
   {
     role: "Safety Officer",
     icon: "safety",
-    email: "safety@commutex.com",
-    password: "safety123",
+    email: "safety.officer@commutex.local",
+    password: "demo@123",
   },
   {
     role: "Financial Analyst",
     icon: "finance",
-    email: "finance@commutex.com",
-    password: "finance123",
+    email: "financial.analyst@commutex.local",
+    password: "demo@123",
+  },
+  {
+    role: "General User",
+    icon: "user",
+    email: "user@commutex.local",
+    password: "demo@123",
   },
 ];
 

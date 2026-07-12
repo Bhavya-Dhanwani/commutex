@@ -15,11 +15,21 @@ import Divider from "../components/jsx/Divider";
 import FormFooter from "../components/jsx/FormFooter";
 
 import useSignup from "../../hooks/useSignup";
+import usePublicRoute from "../../hooks/usePublicRoute";
 import styles from "../css/Signup.module.css";
 
 export default function Signup() {
+  const { loading: sessionLoading } = usePublicRoute();
   const { form, onSubmit, serverError, isSubmitting } = useSignup();
   const { register, formState: { errors } } = form;
+
+  if (sessionLoading) {
+    return (
+      <div style={{ display: "flex", width: "100vw", height: "100vh", alignItems: "center", justifyContent: "center", backgroundColor: "#FAFAFA" }}>
+        <p style={{ fontSize: "15px", fontWeight: 600, color: "#111111", fontFamily: "var(--font-poppins), sans-serif" }}>Verifying session...</p>
+      </div>
+    );
+  }
 
   return (
     <AuthLayout>

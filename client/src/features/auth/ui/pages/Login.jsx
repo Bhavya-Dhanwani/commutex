@@ -19,11 +19,21 @@ import ForgotPasswordLink from "../components/jsx/ForgotPasswordLink";
 import DemoAccounts from "../components/jsx/DemoAccounts";
 
 import useLogin from "../../hooks/useLogin";
+import usePublicRoute from "../../hooks/usePublicRoute";
 import styles from "../css/Login.module.css";
 
 export default function Login() {
+  const { loading: sessionLoading } = usePublicRoute();
   const { form, onSubmit, serverError, isSubmitting } = useLogin();
   const { register, setValue, formState: { errors } } = form;
+
+  if (sessionLoading) {
+    return (
+      <div style={{ display: "flex", width: "100vw", height: "100vh", alignItems: "center", justifyContent: "center", backgroundColor: "#FAFAFA" }}>
+        <p style={{ fontSize: "15px", fontWeight: 600, color: "#111111", fontFamily: "var(--font-poppins), sans-serif" }}>Verifying session...</p>
+      </div>
+    );
+  }
 
   const handleDemoSelect = ({ email, password }) => {
     setValue("email", email, { shouldValidate: true });

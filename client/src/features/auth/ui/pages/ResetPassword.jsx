@@ -10,6 +10,7 @@ import PasswordField from "../components/jsx/PasswordField";
 import ActionButton from "../components/jsx/ActionButton";
 
 import useResetPassword from "../../hooks/useResetPassword";
+import usePublicRoute from "../../hooks/usePublicRoute";
 import styles from "../css/ForgotPassword.module.css"; // We reuse forgot password layout css style
 import successStyles from "../components/css/SuccessMessage.module.css";
 
@@ -17,8 +18,17 @@ export default function ResetPassword() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
 
+  const { loading: sessionLoading } = usePublicRoute();
   const { form, onSubmit, serverError, isSubmitting, submitted } = useResetPassword(token);
   const { register, formState: { errors } } = form;
+
+  if (sessionLoading) {
+    return (
+      <div style={{ display: "flex", width: "100vw", height: "100vh", alignItems: "center", justifyContent: "center", backgroundColor: "#FAFAFA" }}>
+        <p style={{ fontSize: "15px", fontWeight: 600, color: "#111111", fontFamily: "var(--font-poppins), sans-serif" }}>Verifying session...</p>
+      </div>
+    );
+  }
 
   const handleBackToLogin = () => {
     window.location.href = "/login";

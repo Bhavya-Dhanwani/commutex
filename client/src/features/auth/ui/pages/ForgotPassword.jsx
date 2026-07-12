@@ -10,11 +10,21 @@ import ActionButton from "../components/jsx/ActionButton";
 import SuccessMessage from "../components/jsx/SuccessMessage";
 
 import useForgotPassword from "../../hooks/useForgotPassword";
+import usePublicRoute from "../../hooks/usePublicRoute";
 import styles from "../css/ForgotPassword.module.css";
 
 export default function ForgotPassword() {
+  const { loading: sessionLoading } = usePublicRoute();
   const { form, onSubmit, serverError, isSubmitting, submitted } = useForgotPassword();
   const { register, formState: { errors } } = form;
+
+  if (sessionLoading) {
+    return (
+      <div style={{ display: "flex", width: "100vw", height: "100vh", alignItems: "center", justifyContent: "center", backgroundColor: "#FAFAFA" }}>
+        <p style={{ fontSize: "15px", fontWeight: 600, color: "#111111", fontFamily: "var(--font-poppins), sans-serif" }}>Verifying session...</p>
+      </div>
+    );
+  }
 
   const handleBackToLogin = () => {
     window.location.href = "/login";
