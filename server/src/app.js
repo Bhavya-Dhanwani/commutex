@@ -43,6 +43,9 @@ app.use("/api/maintenance", maintenanceRoutes);
 import fuelLogRoutes from "./modules/fuelLog/routes.js";
 app.use("/api/fuel-logs", fuelLogRoutes);
 
+import expenseRoutes from "./modules/expense/routes.js";
+app.use("/api/expenses", expenseRoutes);
+
 // catch-all route
 import ApiError from "./utils/ApiError.js";
 app.all("{*path}", (req, res) => {

@@ -1,0 +1,26 @@
+import { Router } from "express";
+
+import {
+    getExpenses,
+    getExpenseById,
+    createExpense,
+    updateExpense,
+} from "./controller.js";
+
+import { createExpenseSchema, updateExpenseSchema } from "./schema.js";
+import {
+    requireAuth,
+    requireFinancialAnalystOrAdmin,
+} from "../../middlewares/auth.js";
+import validate from "../../middlewares/validate.js";
+
+const router = Router();
+
+router.use(requireAuth, requireFinancialAnalystOrAdmin);
+
+router.get("/", getExpenses);
+router.get("/:id", getExpenseById);
+router.post("/", validate(createExpenseSchema), createExpense);
+router.patch("/:id", validate(updateExpenseSchema), updateExpense);
+
+export default router;
