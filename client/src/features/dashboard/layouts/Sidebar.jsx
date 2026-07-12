@@ -20,7 +20,7 @@ import styles from "../styles/Sidebar.module.css";
 import { clearUser } from "../../auth/state/user.slice";
 import logoutApi from "../../auth/api/logout";
 
-export default function Sidebar({ role, isOpen, onClose, currentTab, onTabChange }) {
+export default function Sidebar({ user, isOpen, onClose, currentTab, onTabChange }) {
   const dispatch = useDispatch();
   const router = useRouter();
 
@@ -35,57 +35,44 @@ export default function Sidebar({ role, isOpen, onClose, currentTab, onTabChange
     }
   };
 
-  // Menu items visibility rule based on user role
+  // Menu items visibility rule based on user role permissions
   const getVisibleMenu = () => {
     const baseMenu = [{ id: "dashboard", label: "Analytics", icon: LuLayoutDashboard }];
 
-    switch (role) {
-      case "Admin":
-        return [
-          ...baseMenu,
-          { id: "vehicles", label: "Vehicles", icon: LuTruck },
-          { id: "drivers", label: "Drivers", icon: LuUsers },
-          { id: "trips", label: "Trips", icon: LuMapPinned },
-          { id: "maintenance", label: "Maintenance", icon: LuWrench },
-          { id: "fuel", label: "Fuel", icon: LuFuel },
-          { id: "expenses", label: "Expenses", icon: LuChartColumn },
-          { id: "users", label: "Users", icon: LuUsers },
-          { id: "settings", label: "Settings", icon: LuSettings },
-        ];
-      case "Fleet Manager":
-        return [
-          ...baseMenu,
-          { id: "vehicles", label: "Vehicles", icon: LuTruck },
-          { id: "maintenance", label: "Maintenance", icon: LuWrench },
-          { id: "settings", label: "Settings", icon: LuSettings },
-        ];
-      case "Dispatcher":
-        return [
-          ...baseMenu,
-          { id: "trips", label: "Trips", icon: LuMapPinned },
-          { id: "drivers", label: "Drivers", icon: LuUsers },
-          { id: "settings", label: "Settings", icon: LuSettings },
-        ];
-      case "Safety Officer":
-        return [
-          ...baseMenu,
-          { id: "drivers", label: "Drivers", icon: LuUsers },
-          { id: "settings", label: "Settings", icon: LuSettings },
-        ];
-      case "Financial Analyst":
-        return [
-          ...baseMenu,
-          { id: "fuel", label: "Fuel", icon: LuFuel },
-          { id: "expenses", label: "Expenses", icon: LuChartColumn },
-          { id: "settings", label: "Settings", icon: LuSettings },
-        ];
-      case "User":
-      default:
-        return [
-          ...baseMenu,
-          { id: "settings", label: "Settings", icon: LuSettings },
-        ];
+    const role = user?.role || "User";
+    const permissions = user?.permissions || {};
+
+    const items = [...baseMenu];
+
+    if (role === "Admin" || permissions.Vehicles === true) {
+      items.push({ id: "vehicles", label: "Vehicles", icon: LuTruck });
     }
+    if (role === "Admin" || permissions.Drivers === true) {
+      items.push({ id: "drivers", label: "Drivers", icon: LuUsers });
+    }
+    if (role === "Admin" || permissions.Trips === true) {
+      items.push({ id: "trips", label: "Trips", icon: LuMapPinned });
+    }
+    if (role === "Admin" || permissions.Maintenance === true) {
+      items.push({ id: "maintenance", label: "Maintenance", icon: LuWrench });
+    }
+    if (role === "Admin" || permissions.Fuel === true) {
+      items.push({ id: "fuel", label: "Fuel", icon: LuFuel });
+    }
+    if (role === "Admin" || permissions.Expenses === true) {
+      items.push({ id: "expenses", label: "Expenses", icon: LuChartColumn });
+    }
+    if (role === "Admin" || permissions.Users === true) {
+      items.push({ id: "users", label: "Users", icon: LuUsers });
+    }
+    if (role === "Admin" || permissions.Settings === true) {
+      items.push({ id: "settings", label: "Settings", icon: LuSettings });
+    } else {
+      // default settings tab fallback so they can access profile
+      items.push({ id: "settings", label: "Settings", icon: LuSettings });
+    }
+
+    return items;
   };
 
   const menuItems = getVisibleMenu();

@@ -163,6 +163,7 @@ export async function me(req, res) {
             email: req.user.email,
             role: req.user.role,
             isVerified: req.user.isVerified,
+            permissions: req.user.permissions,
         },
     });
 }

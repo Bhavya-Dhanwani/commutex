@@ -1,7 +1,6 @@
 "use client";
 
 import { LuUser } from "react-icons/lu";
-import { FcGoogle } from "react-icons/fc";
 
 import AuthLayout from "../layouts/jsx/AuthLayout";
 import LeftPanel from "../layouts/jsx/LeftPanel";
@@ -12,8 +11,6 @@ import FormHeader from "../components/jsx/FormHeader";
 import InputField from "../components/jsx/InputField";
 import PasswordField from "../components/jsx/PasswordField";
 import ActionButton from "../components/jsx/ActionButton";
-import Divider from "../components/jsx/Divider";
-import SocialButton from "../components/jsx/SocialButton";
 import FormFooter from "../components/jsx/FormFooter";
 import ForgotPasswordLink from "../components/jsx/ForgotPasswordLink";
 import DemoAccounts from "../components/jsx/DemoAccounts";
@@ -80,11 +77,7 @@ export default function Login() {
             </ActionButton>
           </form>
 
-          <Divider text="or" />
 
-          <SocialButton icon={FcGoogle}>
-            Continue with Google
-          </SocialButton>
 
           <div className={styles.demoSection}>
             <DemoAccounts onSelect={handleDemoSelect} />

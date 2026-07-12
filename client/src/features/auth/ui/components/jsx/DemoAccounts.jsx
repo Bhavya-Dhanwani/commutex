@@ -10,37 +10,37 @@ const demoAccounts = [
     role: "Admin User",
     icon: "admin",
     email: "admin@commutex.local",
-    password: "demo@123",
+    password: "Demo@123",
   },
   {
     role: "Fleet Manager",
     icon: "fleet",
     email: "fleet.manager@commutex.local",
-    password: "demo@123",
+    password: "Demo@123",
   },
   {
     role: "Dispatcher",
     icon: "dispatcher",
     email: "dispatcher@commutex.local",
-    password: "demo@123",
+    password: "Demo@123",
   },
   {
     role: "Safety Officer",
     icon: "safety",
     email: "safety.officer@commutex.local",
-    password: "demo@123",
+    password: "Demo@123",
   },
   {
     role: "Financial Analyst",
     icon: "finance",
     email: "financial.analyst@commutex.local",
-    password: "demo@123",
+    password: "Demo@123",
   },
   {
     role: "General User",
     icon: "user",
     email: "user@commutex.local",
-    password: "demo@123",
+    password: "Demo@123",
   },
 ];
 

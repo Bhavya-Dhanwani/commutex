@@ -14,7 +14,7 @@ export default function DashboardLayout({ user, currentTab, onTabChange, childre
   return (
     <div className={styles.layout}>
       <Sidebar
-        role={role}
+        user={user}
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
         currentTab={currentTab}

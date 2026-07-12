@@ -47,6 +47,7 @@ import MaintenanceModal from "../components/MaintenanceModal";
 import MaintenanceCompletionModal from "../components/MaintenanceCompletionModal";
 import FuelModal from "../components/FuelModal";
 import ExpenseModal from "../components/ExpenseModal";
+import RoleManagerSettings from "../components/RoleManagerSettings";
 
 import styles from "../styles/DashboardPage.module.css";
 
@@ -250,11 +251,6 @@ export default function Dashboard() {
 
   useEffect(() => {
     const checkUserSession = async () => {
-      if (user) {
-        setLoading(false);
-        return;
-      }
-
       try {
         const response = await meApi();
         const userData = response.user || response.data?.user;
@@ -356,6 +352,38 @@ export default function Dashboard() {
     const isDataTab = ["vehicles", "drivers", "users", "trips", "maintenance", "fuel", "expenses"].includes(currentTab);
 
     if (!isDataTab) {
+      if (currentTab === "settings") {
+        return (
+          <div style={{ display: "flex", flexDirection: "column", gap: "24px", width: "100%" }}>
+            <div className={styles.workspaceCard}>
+              <div className={styles.cardHeader}>
+                <h2 className={styles.cardTitle}>Account Settings</h2>
+              </div>
+              <div style={{ padding: "24px", display: "flex", flexDirection: "column", gap: "16px" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "16px" }}>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                    <label style={{ fontSize: "12px", fontWeight: 600, color: "#666666" }}>Full Name</label>
+                    <input type="text" value={user?.name || ""} readOnly style={{ padding: "10px 14px", border: "1px solid #E7E7E7", borderRadius: "10px", backgroundColor: "#FAFAFA", outline: "none", fontSize: "14px" }} />
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                    <label style={{ fontSize: "12px", fontWeight: 600, color: "#666666" }}>Email Address</label>
+                    <input type="text" value={user?.email || ""} readOnly style={{ padding: "10px 14px", border: "1px solid #E7E7E7", borderRadius: "10px", backgroundColor: "#FAFAFA", outline: "none", fontSize: "14px" }} />
+                  </div>
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: "6px", maxWidth: "200px" }}>
+                  <label style={{ fontSize: "12px", fontWeight: 600, color: "#666666" }}>Current System Role</label>
+                  <span style={{ padding: "6px 12px", borderRadius: "8px", backgroundColor: "#111111", color: "#FFFFFF", fontSize: "13px", fontWeight: 600, width: "fit-content" }}>{user?.role}</span>
+                </div>
+              </div>
+            </div>
+            {role === "Admin" && (
+              <div className={styles.workspaceCard} style={{ padding: "24px" }}>
+                <RoleManagerSettings />
+              </div>
+            )}
+          </div>
+        );
+      }
       return (
         <div className={styles.workspaceCard}>
           <div className={styles.cardHeader}>
@@ -832,7 +860,7 @@ export default function Dashboard() {
                   <tbody>
                     {tabData.map((item) => (
                       <tr key={item.id}>
-                        <td style={{ fontWeight: 600 }}>{item.vehicleId.slice(0, 8)}...</td>
+                        <td style={{ fontWeight: 600 }}>{item.vehicleId?.slice(0, 8) || ""}...</td>
                         <td>{item.maintenanceType || "Routine"}</td>
                         <td>{item.workshop || "N/A"}</td>
                         <td>{item.cost ? `₹${Number(item.cost).toLocaleString()}` : "N/A"}</td>
@@ -936,7 +964,7 @@ export default function Dashboard() {
                   <tbody>
                     {tabData.map((item) => (
                       <tr key={item.id}>
-                        <td style={{ fontWeight: 600 }}>{item.vehicleId.slice(0, 8)}...</td>
+                        <td style={{ fontWeight: 600 }}>{item.vehicleId?.slice(0, 8) || ""}...</td>
                         <td>{item.liters ? `${item.liters} L` : "N/A"}</td>
                         <td>{item.cost ? `₹${Number(item.cost).toLocaleString()}` : "N/A"}</td>
                         <td>{item.odometer ? `${item.odometer} km` : "N/A"}</td>
@@ -984,7 +1012,7 @@ export default function Dashboard() {
                   <tbody>
                     {tabData.map((item) => (
                       <tr key={item.id}>
-                        <td style={{ fontWeight: 600 }}>{item.vehicleId.slice(0, 8)}...</td>
+                        <td style={{ fontWeight: 600 }}>{item.vehicleId?.slice(0, 8) || ""}...</td>
                         <td>
                           <span style={{
                             padding: "4px 8px",
@@ -1322,10 +1350,7 @@ export default function Dashboard() {
           {/* Metrics KPIs section */}
           <KPIGrid role={role} metrics={metrics} />
 
-          {/* Workspace Task Center */}
-          <div style={{ marginBottom: "32px" }}>
-            <WorkspaceSection role={role} />
-          </div>
+
 
           {/* Charts section based on role */}
           {renderDashboardCharts()}
