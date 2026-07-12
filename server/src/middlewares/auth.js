@@ -79,3 +79,12 @@ export function requireDispatcherOrAdmin(req, _res, next) {
 
     return next();
 }
+
+export function requireFinancialAnalystOrAdmin(req, _res, next) {
+    const role = req.user?.role;
+    if (role !== "Financial Analyst" && role !== "Admin") {
+        return next(ApiError.forbidden("Access denied: Financial Analyst or Admin role required"));
+    }
+
+    return next();
+}
