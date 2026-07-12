@@ -1,0 +1,2 @@
+ALTER TABLE "drivers" ALTER COLUMN "phone" SET DATA TYPE varchar(10) USING "phone"::varchar(10);--> statement-breakpoint
+ALTER TABLE "drivers" ALTER COLUMN "emergency_phone" SET DATA TYPE varchar(10) USING "emergency_phone"::varchar(10);

@@ -20,7 +20,7 @@ export const drivers = pgTable("drivers", {
     name: varchar("name", { length: 100 }).notNull(),
     employeeId: varchar("employee_id", { length: 50 }),
 
-    phone: varchar("phone", { length: 20 }),
+    phone: varchar("phone", { length: 10 }),
     email: varchar("email", { length: 255 }),
     address: varchar("address", { length: 255 }),
 
@@ -39,7 +39,7 @@ export const drivers = pgTable("drivers", {
         length: 100,
     }),
     emergencyContactPhone: varchar("emergency_phone", {
-        length: 20,
+        length: 10,
     }),
 
     createdAt: timestamp("created_at").defaultNow().notNull(),

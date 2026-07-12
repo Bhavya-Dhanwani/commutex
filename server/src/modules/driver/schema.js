@@ -31,7 +31,7 @@ export const createDriverSchema = z.strictObject({
                     : "Phone must be a string",
         })
         .trim()
-        .max(20, "Phone should be of 20 chars max")
+        .max(10, "Phone should be of 10 chars max")
         .optional(),
 
     email: z
@@ -144,7 +144,7 @@ export const createDriverSchema = z.strictObject({
                     : "Emergency contact phone must be a string",
         })
         .trim()
-        .max(20, "Emergency contact phone should be of 20 chars max")
+        .max(10, "Emergency contact phone should be of 10 chars max")
         .optional(),
 });
 
@@ -180,7 +180,7 @@ export const updateDriverSchema = z.strictObject({
                     : "Phone must be a string",
         })
         .trim()
-        .max(20, "Phone should be of 20 chars max")
+        .max(10, "Phone should be of 10 chars max")
         .optional(),
 
     email: z
@@ -292,6 +292,6 @@ export const updateDriverSchema = z.strictObject({
                     : "Emergency contact phone must be a string",
         })
         .trim()
-        .max(20, "Emergency contact phone should be of 20 chars max")
+        .max(10, "Emergency contact phone should be of 10 chars max")
         .optional(),
 });
