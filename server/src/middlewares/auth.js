@@ -88,3 +88,12 @@ export function requireFinancialAnalystOrAdmin(req, _res, next) {
 
     return next();
 }
+
+export function requireAnalyticsAccess(req, _res, next) {
+    const role = req.user?.role;
+    if (role !== "Fleet Manager" && role !== "Financial Analyst" && role !== "Admin") {
+        return next(ApiError.forbidden("Access denied: Fleet Manager, Financial Analyst, or Admin role required"));
+    }
+
+    return next();
+}
