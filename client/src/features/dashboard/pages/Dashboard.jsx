@@ -12,6 +12,9 @@ import meApi from "../../auth/api/me";
 import fetchVehicles, { createVehicle, updateVehicle } from "../api/vehicles";
 import fetchDrivers, { createDriver, updateDriver } from "../api/drivers";
 import fetchUsers, { changeUserRole } from "../api/users";
+import fetchTrips, { createTrip, updateTrip, dispatchTrip, completeTrip, cancelTrip } from "../api/trips";
+import fetchMaintenanceLogs, { createMaintenance, updateMaintenance, startMaintenance, completeMaintenance } from "../api/maintenance";
+import fetchFuelLogs, { createFuelLog, updateFuelLog } from "../api/fuel";
 
 import DashboardLayout from "../layouts/DashboardLayout";
 import WelcomeHeader from "../components/WelcomeHeader";
@@ -27,6 +30,13 @@ import EmptyState from "../components/EmptyState";
 import VehicleStatusBars from "../components/VehicleStatusBars";
 import VehicleModal from "../components/VehicleModal";
 import DriverModal from "../components/DriverModal";
+import VehicleDetailsModal from "../components/VehicleDetailsModal";
+import DriverDetailsModal from "../components/DriverDetailsModal";
+import TripModal from "../components/TripModal";
+import TripCompletionModal from "../components/TripCompletionModal";
+import MaintenanceModal from "../components/MaintenanceModal";
+import MaintenanceCompletionModal from "../components/MaintenanceCompletionModal";
+import FuelModal from "../components/FuelModal";
 
 import styles from "../styles/DashboardPage.module.css";
 
@@ -49,29 +59,133 @@ export default function Dashboard() {
   const [activeModal, setActiveModal] = useState(null); // 'vehicle' | 'driver'
   const [modalData, setModalData] = useState(null); // data object to edit, or null for create
 
+  // Read-only detail modal states
+  const [detailModal, setDetailModal] = useState(null); // 'vehicle' | 'driver'
+  const [detailData, setDetailData] = useState(null); // data object to view
+
   const handleVehicleSubmit = async (formData) => {
-    if (modalData) {
-      await updateVehicle(modalData.id, formData);
-      toast.success("Vehicle updated successfully!");
-      setTabData((prev) => prev.map((v) => (v.id === modalData.id ? { ...v, ...formData } : v)));
-    } else {
-      const res = await createVehicle(formData);
-      toast.success("Vehicle registered successfully!");
-      const created = res.vehicle || res.data?.vehicle || res;
-      setTabData((prev) => [created, ...prev]);
+    try {
+      if (modalData) {
+        await updateVehicle(modalData.id, formData);
+        toast.success("Vehicle updated successfully!");
+        setTabData((prev) => prev.map((v) => (v.id === modalData.id ? { ...v, ...formData } : v)));
+      } else {
+        const res = await createVehicle(formData);
+        toast.success("Vehicle registered successfully!");
+        const created = res.vehicle || res.data?.vehicle || res;
+        setTabData((prev) => [created, ...prev]);
+      }
+      setActiveModal(null);
+      setModalData(null);
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.message || err.message || "Failed to save vehicle");
     }
   };
 
   const handleDriverSubmit = async (formData) => {
-    if (modalData) {
-      await updateDriver(modalData.id, formData);
-      toast.success("Driver profile updated successfully!");
-      setTabData((prev) => prev.map((d) => (d.id === modalData.id ? { ...d, ...formData } : d)));
-    } else {
-      const res = await createDriver(formData);
-      toast.success("Driver registered successfully!");
-      const created = res.driver || res.data?.driver || res;
-      setTabData((prev) => [created, ...prev]);
+    try {
+      if (modalData) {
+        await updateDriver(modalData.id, formData);
+        toast.success("Driver profile updated successfully!");
+        setTabData((prev) => prev.map((d) => (d.id === modalData.id ? { ...d, ...formData } : d)));
+      } else {
+        const res = await createDriver(formData);
+        toast.success("Driver registered successfully!");
+        const created = res.driver || res.data?.driver || res;
+        setTabData((prev) => [created, ...prev]);
+      }
+      setActiveModal(null);
+      setModalData(null);
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.message || err.message || "Failed to save driver");
+    }
+  };
+
+  const handleTripSubmit = async (formData) => {
+    try {
+      if (modalData) {
+        await updateTrip(modalData.id, formData);
+        toast.success("Trip updated successfully!");
+        setTabData((prev) => prev.map((t) => (t.id === modalData.id ? { ...t, ...formData } : t)));
+      } else {
+        const res = await createTrip(formData);
+        toast.success("Trip created as draft!");
+        const created = res.trip || res.data?.trip || res;
+        setTabData((prev) => [created, ...prev]);
+      }
+      setActiveModal(null);
+      setModalData(null);
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.message || err.message || "Failed to save trip");
+    }
+  };
+
+  const handleTripCompleteSubmit = async (payload) => {
+    try {
+      await completeTrip(modalData.id, payload);
+      toast.success("Trip completed successfully!");
+      setTabData((prev) => prev.map((t) => (t.id === modalData.id ? { ...t, ...payload, status: "Completed" } : t)));
+      setActiveModal(null);
+      setModalData(null);
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.message || err.message || "Failed to complete trip");
+    }
+  };
+
+  const handleMaintenanceSubmit = async (formData) => {
+    try {
+      if (modalData) {
+        await updateMaintenance(modalData.id, formData);
+        toast.success("Maintenance log updated successfully!");
+        setTabData((prev) => prev.map((m) => (m.id === modalData.id ? { ...m, ...formData } : m)));
+      } else {
+        const res = await createMaintenance(formData);
+        toast.success("Maintenance log created!");
+        const created = res.maintenanceLog || res.data?.maintenanceLog || res;
+        setTabData((prev) => [created, ...prev]);
+      }
+      setActiveModal(null);
+      setModalData(null);
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.message || err.message || "Failed to save maintenance log");
+    }
+  };
+
+  const handleMaintenanceCompleteSubmit = async (payload) => {
+    try {
+      await completeMaintenance(modalData.id, payload);
+      toast.success("Maintenance log completed!");
+      setTabData((prev) => prev.map((m) => (m.id === modalData.id ? { ...m, ...payload, status: "Completed" } : m)));
+      setActiveModal(null);
+      setModalData(null);
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.message || err.message || "Failed to complete maintenance log");
+    }
+  };
+
+  const handleFuelSubmit = async (formData) => {
+    try {
+      if (modalData) {
+        await updateFuelLog(modalData.id, formData);
+        toast.success("Fuel log updated successfully!");
+        setTabData((prev) => prev.map((f) => (f.id === modalData.id ? { ...f, ...formData } : f)));
+      } else {
+        const res = await createFuelLog(formData);
+        toast.success("Fuel log recorded successfully!");
+        const created = res.fuelLog || res.data?.fuelLog || res;
+        setTabData((prev) => [created, ...prev]);
+      }
+      setActiveModal(null);
+      setModalData(null);
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.message || err.message || "Failed to save fuel log");
     }
   };
 
@@ -114,7 +228,7 @@ export default function Dashboard() {
       setTabData([]);
 
       try {
-        if (currentTab === "fleet") {
+        if (currentTab === "vehicles") {
           const res = await fetchVehicles();
           setTabData(res.vehicles || res.data?.vehicles || []);
         } else if (currentTab === "drivers") {
@@ -123,6 +237,15 @@ export default function Dashboard() {
         } else if (currentTab === "users") {
           const res = await fetchUsers();
           setTabData(res.users || res.data?.users || []);
+        } else if (currentTab === "trips") {
+          const res = await fetchTrips();
+          setTabData(res.trips || res.data?.trips || []);
+        } else if (currentTab === "maintenance") {
+          const res = await fetchMaintenanceLogs();
+          setTabData(res.maintenanceLogs || res.data?.maintenanceLogs || []);
+        } else if (currentTab === "fuel") {
+          const res = await fetchFuelLogs();
+          setTabData(res.fuelLogs || res.data?.fuelLogs || []);
         }
       } catch (err) {
         console.error("Failed to load tab data:", err);
@@ -168,7 +291,7 @@ export default function Dashboard() {
 
   const renderTabContent = () => {
     // Check if the current tab is an integrated data tab
-    const isDataTab = ["fleet", "drivers", "users"].includes(currentTab);
+    const isDataTab = ["vehicles", "drivers", "users", "trips", "maintenance", "fuel"].includes(currentTab);
 
     if (!isDataTab) {
       return (
@@ -227,7 +350,7 @@ export default function Dashboard() {
               {tabData.length} records found
             </span>
           </div>
-          {currentTab === "fleet" && (
+          {currentTab === "vehicles" && (
             <button
               type="button"
               onClick={() => {
@@ -271,22 +394,98 @@ export default function Dashboard() {
               + Add Driver
             </button>
           )}
+          {currentTab === "trips" && (
+            <button
+              type="button"
+              onClick={() => {
+                setActiveModal("trip");
+                setModalData(null);
+              }}
+              style={{
+                padding: "8px 16px",
+                borderRadius: "10px",
+                border: "none",
+                backgroundColor: "#111111",
+                color: "#FFFFFF",
+                fontSize: "13px",
+                fontWeight: 600,
+                cursor: "pointer",
+                transition: "opacity 0.2s",
+              }}
+            >
+              + Create Trip
+            </button>
+          )}
+          {currentTab === "maintenance" && (
+            <button
+              type="button"
+              onClick={() => {
+                setActiveModal("maintenance");
+                setModalData(null);
+              }}
+              style={{
+                padding: "8px 16px",
+                borderRadius: "10px",
+                border: "none",
+                backgroundColor: "#111111",
+                color: "#FFFFFF",
+                fontSize: "13px",
+                fontWeight: 600,
+                cursor: "pointer",
+                transition: "opacity 0.2s",
+              }}
+            >
+              + Add Maintenance
+            </button>
+          )}
+          {currentTab === "fuel" && (
+            <button
+              type="button"
+              onClick={() => {
+                setActiveModal("fuel");
+                setModalData(null);
+              }}
+              style={{
+                padding: "8px 16px",
+                borderRadius: "10px",
+                border: "none",
+                backgroundColor: "#111111",
+                color: "#FFFFFF",
+                fontSize: "13px",
+                fontWeight: 600,
+                cursor: "pointer",
+                transition: "opacity 0.2s",
+              }}
+            >
+              + Log Fuel
+            </button>
+          )}
         </div>
 
         {tabData.length === 0 ? (
           <EmptyState
             title={`No ${currentTab} registered`}
             description={`Your system does not have any active ${currentTab} registered on the database.`}
-            actionText={`Register ${currentTab.slice(0, -1)}`}
+            actionText={`Register ${currentTab === "maintenance" ? "Maintenance" : currentTab === "fuel" ? "Fuel Log" : currentTab.slice(0, -1)}`}
             onAction={() => {
-              setActiveModal(currentTab === "fleet" ? "vehicle" : "driver");
+              if (currentTab === "vehicles") {
+                setActiveModal("vehicle");
+              } else if (currentTab === "drivers") {
+                setActiveModal("driver");
+              } else if (currentTab === "trips") {
+                setActiveModal("trip");
+              } else if (currentTab === "maintenance") {
+                setActiveModal("maintenance");
+              } else if (currentTab === "fuel") {
+                setActiveModal("fuel");
+              }
               setModalData(null);
             }}
           />
         ) : (
           <div className={styles.tableWrapper}>
             <table className={styles.table}>
-              {currentTab === "fleet" && (
+              {currentTab === "vehicles" && (
                 <>
                   <thead>
                     <tr>
@@ -301,13 +500,13 @@ export default function Dashboard() {
                   </thead>
                   <tbody>
                     {tabData.map((item) => (
-                      <tr key={item.id}>
-                        <td style={{ fontWeight: 600 }}>{item.model}</td>
-                        <td>{item.registrationNumber}</td>
-                        <td>{item.type}</td>
-                        <td>{item.maxLoadCapacity} kg</td>
-                        <td>{item.odometer} km</td>
-                        <td>
+                      <tr key={item.id} style={{ cursor: "pointer" }}>
+                        <td onClick={() => { setDetailModal("vehicle"); setDetailData(item); }} style={{ fontWeight: 600 }}>{item.model}</td>
+                        <td onClick={() => { setDetailModal("vehicle"); setDetailData(item); }}>{item.registrationNumber}</td>
+                        <td onClick={() => { setDetailModal("vehicle"); setDetailData(item); }}>{item.type}</td>
+                        <td onClick={() => { setDetailModal("vehicle"); setDetailData(item); }}>{item.maxLoadCapacity} kg</td>
+                        <td onClick={() => { setDetailModal("vehicle"); setDetailData(item); }}>{item.odometer} km</td>
+                        <td onClick={() => { setDetailModal("vehicle"); setDetailData(item); }}>
                           <span className={`${styles.statusBadge} ${item.status === "Active" || item.status === "Available" ? styles.statusSuccess : styles.statusWarning}`}>
                             {item.status}
                           </span>
@@ -315,7 +514,8 @@ export default function Dashboard() {
                         <td>
                           <button
                             type="button"
-                            onClick={() => {
+                            onClick={(e) => {
+                              e.stopPropagation();
                               setModalData(item);
                               setActiveModal("vehicle");
                             }}
@@ -354,13 +554,13 @@ export default function Dashboard() {
                   </thead>
                   <tbody>
                     {tabData.map((item) => (
-                      <tr key={item.id}>
-                        <td style={{ fontWeight: 600 }}>{item.name}</td>
-                        <td>{item.licenseNumber} ({item.licenseCategory})</td>
-                        <td>{item.phone}</td>
-                        <td>{item.safetyScore}/100</td>
-                        <td>{item.experienceYears} Years</td>
-                        <td>
+                      <tr key={item.id} style={{ cursor: "pointer" }}>
+                        <td onClick={() => { setDetailModal("driver"); setDetailData(item); }} style={{ fontWeight: 600 }}>{item.name}</td>
+                        <td onClick={() => { setDetailModal("driver"); setDetailData(item); }}>{item.licenseNumber} ({item.licenseCategory})</td>
+                        <td onClick={() => { setDetailModal("driver"); setDetailData(item); }}>{item.phone}</td>
+                        <td onClick={() => { setDetailModal("driver"); setDetailData(item); }}>{item.safetyScore}/100</td>
+                        <td onClick={() => { setDetailModal("driver"); setDetailData(item); }}>{item.experienceYears} Years</td>
+                        <td onClick={() => { setDetailModal("driver"); setDetailData(item); }}>
                           <span className={`${styles.statusBadge} ${item.status === "Active" || item.status === "Available" ? styles.statusSuccess : styles.statusWarning}`}>
                             {item.status}
                           </span>
@@ -368,9 +568,300 @@ export default function Dashboard() {
                         <td>
                           <button
                             type="button"
-                            onClick={() => {
+                            onClick={(e) => {
+                              e.stopPropagation();
                               setModalData(item);
                               setActiveModal("driver");
+                            }}
+                            style={{
+                              padding: "4px 8px",
+                              borderRadius: "6px",
+                              border: "1px solid #E7E7E7",
+                              background: "#FFFFFF",
+                              fontSize: "11px",
+                              fontWeight: 600,
+                              color: "#111111",
+                              cursor: "pointer",
+                            }}
+                          >
+                            Edit
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </>
+              )}
+
+              {currentTab === "trips" && (
+                <>
+                  <thead>
+                    <tr>
+                      <th>Trip Number</th>
+                      <th>Route</th>
+                      <th>Cargo Weight</th>
+                      <th>Distance</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {tabData.map((item) => (
+                      <tr key={item.id}>
+                        <td style={{ fontWeight: 600 }}>{item.tripNumber}</td>
+                        <td>{item.source || "N/A"} &rarr; {item.destination || "N/A"}</td>
+                        <td>{item.cargoWeight ? `${item.cargoWeight} kg` : "N/A"}</td>
+                        <td>{item.plannedDistance ? `${item.plannedDistance} km` : "N/A"}</td>
+                        <td>
+                          <span className={`${styles.statusBadge} ${
+                            item.status === "Completed" ? styles.statusSuccess :
+                            item.status === "Dispatched" ? styles.statusWarning :
+                            item.status === "Draft" ? styles.statusWarning :
+                            styles.roleBadge
+                          }`} style={{
+                            backgroundColor: item.status === "Draft" ? "#f3f4f6" : undefined,
+                            color: item.status === "Draft" ? "#374151" : undefined,
+                            border: item.status === "Draft" ? "1px solid #e5e7eb" : undefined,
+                          }}>
+                            {item.status}
+                          </span>
+                        </td>
+                        <td>
+                          <div style={{ display: "flex", gap: "6px" }}>
+                            {item.status === "Draft" && (
+                              <>
+                                <button
+                                  type="button"
+                                  onClick={async () => {
+                                    try {
+                                      await dispatchTrip(item.id);
+                                      toast.success("Trip dispatched successfully!");
+                                      setTabData((prev) => prev.map((t) => (t.id === item.id ? { ...t, status: "Dispatched" } : t)));
+                                    } catch (err) {
+                                      toast.error(err.response?.data?.message || err.message);
+                                    }
+                                  }}
+                                  style={{
+                                    padding: "4px 8px",
+                                    borderRadius: "6px",
+                                    border: "none",
+                                    background: "#111111",
+                                    color: "#FFFFFF",
+                                    fontSize: "11px",
+                                    fontWeight: 600,
+                                    cursor: "pointer",
+                                  }}
+                                >
+                                  Dispatch
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setModalData(item);
+                                    setActiveModal("trip");
+                                  }}
+                                  style={{
+                                    padding: "4px 8px",
+                                    borderRadius: "6px",
+                                    border: "1px solid #E7E7E7",
+                                    background: "#FFFFFF",
+                                    fontSize: "11px",
+                                    fontWeight: 600,
+                                    color: "#111111",
+                                    cursor: "pointer",
+                                  }}
+                                >
+                                  Edit
+                                </button>
+                              </>
+                            )}
+                            {item.status === "Dispatched" && (
+                              <>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setModalData(item);
+                                    setActiveModal("completeTrip");
+                                  }}
+                                  style={{
+                                    padding: "4px 8px",
+                                    borderRadius: "6px",
+                                    border: "none",
+                                    background: "#16a34a",
+                                    color: "#FFFFFF",
+                                    fontSize: "11px",
+                                    fontWeight: 600,
+                                    cursor: "pointer",
+                                  }}
+                                >
+                                  Confirm
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={async () => {
+                                    try {
+                                      await cancelTrip(item.id);
+                                      toast.success("Trip cancelled.");
+                                      setTabData((prev) => prev.map((t) => (t.id === item.id ? { ...t, status: "Cancelled" } : t)));
+                                    } catch (err) {
+                                      toast.error(err.response?.data?.message || err.message);
+                                    }
+                                  }}
+                                  style={{
+                                    padding: "4px 8px",
+                                    borderRadius: "6px",
+                                    border: "1px solid #dc2626",
+                                    background: "#FFFFFF",
+                                    fontSize: "11px",
+                                    fontWeight: 600,
+                                    color: "#dc2626",
+                                    cursor: "pointer",
+                                  }}
+                                >
+                                  Cancel
+                                </button>
+                              </>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </>
+              )}
+
+              {currentTab === "maintenance" && (
+                <>
+                  <thead>
+                    <tr>
+                      <th>Vehicle ID</th>
+                      <th>Type</th>
+                      <th>Workshop</th>
+                      <th>Cost</th>
+                      <th>Started Date</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {tabData.map((item) => (
+                      <tr key={item.id}>
+                        <td style={{ fontWeight: 600 }}>{item.vehicleId.slice(0, 8)}...</td>
+                        <td>{item.maintenanceType || "Routine"}</td>
+                        <td>{item.workshop || "N/A"}</td>
+                        <td>{item.cost ? `₹${Number(item.cost).toLocaleString()}` : "N/A"}</td>
+                        <td>{item.startDate ? new Date(item.startDate).toLocaleDateString() : "Not Started"}</td>
+                        <td>
+                          <span className={`${styles.statusBadge} ${item.status === "Completed" ? styles.statusSuccess : styles.statusWarning}`}>
+                            {item.status} {item.startDate && item.status !== "Completed" && "(In Progress)"}
+                          </span>
+                        </td>
+                        <td>
+                          <div style={{ display: "flex", gap: "6px" }}>
+                            {item.status === "Active" && !item.startDate && (
+                              <>
+                                <button
+                                  type="button"
+                                  onClick={async () => {
+                                    try {
+                                      await startMaintenance(item.id);
+                                      toast.success("Maintenance started!");
+                                      setTabData((prev) => prev.map((m) => (m.id === item.id ? { ...m, startDate: new Date().toISOString() } : m)));
+                                    } catch (err) {
+                                      toast.error(err.response?.data?.message || err.message);
+                                    }
+                                  }}
+                                  style={{
+                                    padding: "4px 8px",
+                                    borderRadius: "6px",
+                                    border: "none",
+                                    background: "#111111",
+                                    color: "#FFFFFF",
+                                    fontSize: "11px",
+                                    fontWeight: 600,
+                                    cursor: "pointer",
+                                  }}
+                                >
+                                  Start
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setModalData(item);
+                                    setActiveModal("maintenance");
+                                  }}
+                                  style={{
+                                    padding: "4px 8px",
+                                    borderRadius: "6px",
+                                    border: "1px solid #E7E7E7",
+                                    background: "#FFFFFF",
+                                    fontSize: "11px",
+                                    fontWeight: 600,
+                                    color: "#111111",
+                                    cursor: "pointer",
+                                  }}
+                                >
+                                  Edit
+                                </button>
+                              </>
+                            )}
+                            {item.status === "Active" && item.startDate && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setModalData(item);
+                                  setActiveModal("completeMaintenance");
+                                }}
+                                style={{
+                                  padding: "4px 8px",
+                                  borderRadius: "6px",
+                                  border: "none",
+                                  background: "#16a34a",
+                                  color: "#FFFFFF",
+                                  fontSize: "11px",
+                                  fontWeight: 600,
+                                  cursor: "pointer",
+                                }}
+                              >
+                                Complete
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </>
+              )}
+
+              {currentTab === "fuel" && (
+                <>
+                  <thead>
+                    <tr>
+                      <th>Vehicle ID</th>
+                      <th>Volume</th>
+                      <th>Cost</th>
+                      <th>Odometer</th>
+                      <th>Fuel Station</th>
+                      <th>Filled On</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {tabData.map((item) => (
+                      <tr key={item.id}>
+                        <td style={{ fontWeight: 600 }}>{item.vehicleId.slice(0, 8)}...</td>
+                        <td>{item.liters ? `${item.liters} L` : "N/A"}</td>
+                        <td>{item.cost ? `₹${Number(item.cost).toLocaleString()}` : "N/A"}</td>
+                        <td>{item.odometer ? `${item.odometer} km` : "N/A"}</td>
+                        <td>{item.fuelStation || "N/A"}</td>
+                        <td>{item.filledOn ? new Date(item.filledOn).toLocaleDateString() : "N/A"}</td>
+                        <td>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setModalData(item);
+                              setActiveModal("fuel");
                             }}
                             style={{
                               padding: "4px 8px",
@@ -734,6 +1225,76 @@ export default function Dashboard() {
             setModalData(null);
           }}
           onSubmit={handleDriverSubmit}
+        />
+      )}
+      {activeModal === "trip" && (
+        <TripModal
+          trip={modalData}
+          onClose={() => {
+            setActiveModal(null);
+            setModalData(null);
+          }}
+          onSubmit={handleTripSubmit}
+        />
+      )}
+      {activeModal === "completeTrip" && (
+        <TripCompletionModal
+          trip={modalData}
+          onClose={() => {
+            setActiveModal(null);
+            setModalData(null);
+          }}
+          onSubmit={handleTripCompleteSubmit}
+        />
+      )}
+      {activeModal === "maintenance" && (
+        <MaintenanceModal
+          log={modalData}
+          onClose={() => {
+            setActiveModal(null);
+            setModalData(null);
+          }}
+          onSubmit={handleMaintenanceSubmit}
+        />
+      )}
+      {activeModal === "completeMaintenance" && (
+        <MaintenanceCompletionModal
+          log={modalData}
+          onClose={() => {
+            setActiveModal(null);
+            setModalData(null);
+          }}
+          onSubmit={handleMaintenanceCompleteSubmit}
+        />
+      )}
+      {activeModal === "fuel" && (
+        <FuelModal
+          log={modalData}
+          onClose={() => {
+            setActiveModal(null);
+            setModalData(null);
+          }}
+          onSubmit={handleFuelSubmit}
+        />
+      )}
+
+      {/* Detail Overlay Modals */}
+      {detailModal === "vehicle" && (
+        <VehicleDetailsModal
+          vehicle={detailData}
+          onClose={() => {
+            setDetailModal(null);
+            setDetailData(null);
+          }}
+        />
+      )}
+      {detailModal === "driver" && (
+        <DriverDetailsModal
+          driver={detailData}
+          onClose={() => {
+            setDetailModal(null);
+            setDetailData(null);
+          }}
         />
       )}
     </DashboardLayout>

@@ -43,7 +43,7 @@ export default function Sidebar({ role, isOpen, onClose, currentTab, onTabChange
       case "Admin":
         return [
           ...baseMenu,
-          { id: "fleet", label: "Fleet", icon: LuTruck },
+          { id: "vehicles", label: "Vehicles", icon: LuTruck },
           { id: "drivers", label: "Drivers", icon: LuUsers },
           { id: "trips", label: "Trips", icon: LuMapPinned },
           { id: "maintenance", label: "Maintenance", icon: LuWrench },
@@ -58,7 +58,7 @@ export default function Sidebar({ role, isOpen, onClose, currentTab, onTabChange
       case "Fleet Manager":
         return [
           ...baseMenu,
-          { id: "fleet", label: "Fleet", icon: LuTruck },
+          { id: "vehicles", label: "Vehicles", icon: LuTruck },
           { id: "maintenance", label: "Maintenance", icon: LuWrench },
           { id: "settings", label: "Settings", icon: LuSettings },
         ];
