@@ -22,7 +22,8 @@ import {
   fetchVehicleRoi,
   fetchExpensesAnalytics,
   fetchRevenueAnalytics,
-  fetchMaintenanceAnalytics
+  fetchMaintenanceAnalytics,
+  fetchRecentActivity
 } from "../api/analytics";
 
 import DashboardLayout from "../layouts/DashboardLayout";
@@ -222,6 +223,7 @@ export default function Dashboard() {
 
   // Real API metrics for Analytics Dashboard tab
   const [metrics, setMetrics] = useState(null);
+  const [activities, setActivities] = useState([]);
 
   useEffect(() => {
     if (currentTab === "dashboard") {
@@ -233,6 +235,8 @@ export default function Dashboard() {
           const exp = await fetchExpensesAnalytics();
           const rev = await fetchRevenueAnalytics();
           const maint = await fetchMaintenanceAnalytics();
+          const act = await fetchRecentActivity();
+
           setMetrics({
             utilization: util.data || util,
             fuel: fuel.data || fuel,
@@ -241,6 +245,47 @@ export default function Dashboard() {
             revenue: rev.data || rev,
             maintenance: maint.data || maint,
           });
+
+          const recentData = act.data || act || {};
+          const formatted = [];
+          if (recentData.trips) {
+            recentData.trips.forEach((t) => {
+              formatted.push({
+                time: new Date(t.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                text: `Trip TX-${t.tripNumber?.slice(0, 8) || "N/A"} status updated to ${t.status}`,
+                createdAt: new Date(t.createdAt),
+              });
+            });
+          }
+          if (recentData.maintenance) {
+            recentData.maintenance.forEach((m) => {
+              formatted.push({
+                time: new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                text: `Maintenance task for Vehicle ${m.vehicleId?.slice(0, 8) || "N/A"} - Status: ${m.status}`,
+                createdAt: new Date(m.createdAt),
+              });
+            });
+          }
+          if (recentData.expenses) {
+            recentData.expenses.forEach((e) => {
+              formatted.push({
+                time: new Date(e.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                text: `Expense of ₹${Number(e.amount).toLocaleString()} logged for Category ${e.category}`,
+                createdAt: new Date(e.createdAt),
+              });
+            });
+          }
+          if (recentData.fuelLogs) {
+            recentData.fuelLogs.forEach((f) => {
+              formatted.push({
+                time: new Date(f.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                text: `Fuel replenishment: ${f.liters}L logged (Cost: ₹${Number(f.cost).toLocaleString()})`,
+                createdAt: new Date(f.createdAt),
+              });
+            });
+          }
+          formatted.sort((a, b) => b.createdAt - a.createdAt);
+          setActivities(formatted.slice(0, 8));
         } catch (e) {
           console.error("Failed to load analytics metrics:", e);
         }
@@ -256,6 +301,9 @@ export default function Dashboard() {
         const userData = response.user || response.data?.user;
         if (userData) {
           dispatch(setUser(userData));
+          if (userData.role === "User") {
+            router.push("/wait");
+          }
         } else {
           router.push("/login");
         }
@@ -1293,10 +1341,7 @@ export default function Dashboard() {
                 </table>
               </div>
             </div>
-            <ActivityFeed activities={[
-              { time: "09:15 AM", text: "Fuel bill EXP-400 approved by Analyst" },
-              { time: "10:45 AM", text: "Monthly budget forecast report exported" },
-            ]} />
+            <ActivityFeed activities={activities} />
           </div>
         );
       default:
@@ -1309,7 +1354,7 @@ export default function Dashboard() {
                 toast.success("Mock dispatch trip created!");
               }}
             />
-            <ActivityFeed />
+            <ActivityFeed activities={activities} />
           </div>
         );
     }
@@ -1343,9 +1388,14 @@ export default function Dashboard() {
   return (
     <DashboardLayout user={user} currentTab={currentTab} onTabChange={setCurrentTab}>
       {currentTab === "dashboard" ? (
-        <>
-          {/* Welcome Greeting Banner */}
-          <WelcomeHeader user={user} />
+        metrics === null ? (
+          <div style={{ display: "flex", width: "100%", height: "60vh", alignItems: "center", justifyContent: "center" }}>
+            <p style={{ fontSize: "15px", fontWeight: 500, color: "#666666" }}>Loading analytics overview data...</p>
+          </div>
+        ) : (
+          <>
+            {/* Welcome Greeting Banner */}
+            <WelcomeHeader user={user} />
 
           {/* Metrics KPIs section */}
           <KPIGrid role={role} metrics={metrics} />
@@ -1372,6 +1422,7 @@ export default function Dashboard() {
             </div>
           )}
         </>
+        )
       ) : (
         renderTabContent()
       )}

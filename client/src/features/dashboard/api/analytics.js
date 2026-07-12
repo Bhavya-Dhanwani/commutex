@@ -29,3 +29,8 @@ export async function fetchMaintenanceAnalytics() {
   const response = await api.get("/analytics/maintenance");
   return response.data;
 }
+
+export async function fetchRecentActivity() {
+  const response = await api.get("/analytics/recent");
+  return response.data;
+}

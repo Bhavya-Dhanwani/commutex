@@ -41,7 +41,7 @@ export default function useSignup() {
         dispatch(setAccessToken(response.accessToken));
         setApiAccessToken(response.accessToken);
       }
-      toast.success("Verification OTP sent to your email");
+      toast.success("Verify link sent for verification");
       return response;
     } catch (error) {
       const message = error.response?.data?.message || "Signup failed. Please try again.";

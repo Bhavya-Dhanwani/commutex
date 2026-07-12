@@ -13,7 +13,11 @@ export default function usePublicRoute() {
   useEffect(() => {
     const checkSession = async () => {
       if (user) {
-        router.push("/dashboard");
+        if (user.role === "User") {
+          router.push("/wait");
+        } else {
+          router.push("/dashboard");
+        }
         return;
       }
 
@@ -22,7 +26,11 @@ export default function usePublicRoute() {
         const userData = response.user || response.data?.user;
         if (userData) {
           dispatch(setUser(userData));
-          router.push("/dashboard");
+          if (userData.role === "User") {
+            router.push("/wait");
+          } else {
+            router.push("/dashboard");
+          }
         } else {
           setLoading(false);
         }

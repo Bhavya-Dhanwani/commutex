@@ -45,7 +45,11 @@ export default function useLogin() {
         router.push("/verify-email");
       } else {
         toast.success("Login successful");
-        router.push("/dashboard");
+        if (user && user.role === "User") {
+          router.push("/wait");
+        } else {
+          router.push("/dashboard");
+        }
       }
 
       return response;
