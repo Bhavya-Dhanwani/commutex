@@ -25,6 +25,9 @@ app.get("/api/ping", (req, res) => {
 import authRoutes from "./modules/auth/routes.js";
 app.use("/api/auth", authRoutes);
 
+import userRoutes from "./modules/user/routes.js";
+app.use("/api/users", userRoutes);
+
 // catch-all route
 import ApiError from "./utils/ApiError.js";
 app.all("{*path}", (req, res) => {

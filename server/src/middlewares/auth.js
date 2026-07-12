@@ -46,7 +46,7 @@ export function requireNotVerified(req, res, next) {
 }
 
 export function requireAdmin(req, _res, next) {
-    if (!req.user.isAdmin) {
+    if (req.user?.role !== "Admin") {
         return next(ApiError.forbidden("Admin access required"));
     }
 
